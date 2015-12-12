@@ -3,14 +3,12 @@ package NC_Lab1.Model;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Created by azaz on 26/10/15. 
- * Updated by ovikeee on 04/11/15.
+ * Created by azaz on 26/10/15. Updated by ovikeee on 04/11/15.
  */
 public class GenreStorage implements Serializable {
 
@@ -94,14 +92,18 @@ public class GenreStorage implements Serializable {
     }
 
     public static void addGenre(Genre newGenre) {
-        storage.put(newGenre.getId_genre(), newGenre);
-        System.out.println("Жанр: " + newGenre.getName() + " с Id= " + newGenre.getId_genre()+ " добавлен!");
+        if (getByTitle(newGenre.getName()) == null) {
+            storage.put(newGenre.getId_genre(), newGenre);
+            System.out.println("Жанр: " + newGenre.getName() + " с Id= " + newGenre.getId_genre() + " добавлен!");
+        }
     }
 
     public static void addGenre(String nameGenre) {
-        Genre newGenre = new Genre(nameGenre);
-        storage.put(newGenre.getId_genre(), newGenre);
-        System.out.println("Жанр: " + newGenre.getName() + " с Id= " + newGenre.getId_genre()+ " добавлен!");
+        if (getByTitle(nameGenre) == null) {
+            Genre newGenre = new Genre(nameGenre);
+            storage.put(newGenre.getId_genre(), newGenre);
+            System.out.println("Жанр: " + newGenre.getName() + " с Id= " + newGenre.getId_genre() + " добавлен!");
+        }
     }
 
     public static void removeGenreById(long idGenre) {
@@ -116,10 +118,10 @@ public class GenreStorage implements Serializable {
     public static void removeAll() {
         storage.clear();
     }
-    
+
     protected Object readResolve() {
 //        GenreStorage.setStorage(this.storage);
-        return ourInstance;
+        return ourInstance;//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     }
 
     private static class SingletonHelper {

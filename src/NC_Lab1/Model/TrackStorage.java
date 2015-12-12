@@ -105,7 +105,7 @@ public class TrackStorage implements Serializable {
         }
         return tracks;
     }
-    
+
     public static ArrayList<Track> getByLength(Long length) {
         ArrayList<Track> tracks = new ArrayList<>();
         for (Map.Entry<Long, Track> entry : storage.entrySet()) {
@@ -116,7 +116,6 @@ public class TrackStorage implements Serializable {
         return tracks;
     }
 
-    
     /**
      * @param id id to find in id of album
      * @return finded genre or null if id not found
@@ -134,8 +133,10 @@ public class TrackStorage implements Serializable {
     }
 
     public static void addTrack(Track newTrack) {
-        storage.put(newTrack.getId(), newTrack);
-        System.out.println("Трек: " + newTrack.getTitle() + " с Id= " + newTrack.getId() + " добавлен!");
+        if (TrackStorage.getById(newTrack.getId()) == null) {
+            storage.put(newTrack.getId(), newTrack);
+            System.out.println("Трек: " + newTrack.getTitle() + " с Id= " + newTrack.getId() + " добавлен!");
+        }
     }
 
     public static void addTrack(String name, String albumName, String artist, long length, String genre) {

@@ -104,9 +104,9 @@ public class GUI extends javax.swing.JFrame {
     }
 
     public void startState() {
-
+        jComboBoxGenre.removeAllItems();
         try {
-            ctrl.load("defaultFile");
+            strings = new ArrayList<>();
             strings = ctrl.findAllGenre();
             StringTokenizer st;
             for (String string : strings) {
@@ -543,8 +543,7 @@ public class GUI extends javax.swing.JFrame {
                 Logger.getLogger(GUI.class.getName()).log(Level.SEVERE, null, ex);
                 errorMessage("Не удалось открыть/сохранить файл!");
             }
-
-            findAndShowInTable(FindTrack.ByAllTrack, "");
+            startState();
         }
     }//GEN-LAST:event_jBAddActionPerformed
 
@@ -556,7 +555,7 @@ public class GUI extends javax.swing.JFrame {
      * Show all tracks Возможна ошибка, если все параметры трека не указаны
      */
     private void jBShowAllActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jBShowAllActionPerformed
-        findAndShowInTable(FindTrack.ByAllTrack, "");
+        startState();
     }//GEN-LAST:event_jBShowAllActionPerformed
 
     /**
@@ -565,38 +564,39 @@ public class GUI extends javax.swing.JFrame {
     private void jMenuItemOpenActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemOpenActionPerformed
         JFileChooser fileopen = new JFileChooser();
 
+        fileopen.setCurrentDirectory(new File("C:\\Users\\User\\Documents\\NetBeansProjects\\MusicLibrary"));
         try {
 
             JFileChooser fc = new JFileChooser();
             //для фильтрации по формату
 //            FileNameExtensionFilter filter = new FileNameExtensionFilter("*.genre,*.track,*.*");
 //            fc.setFileFilter(filter);
-            fc.setCurrentDirectory(new File("C:\\Users\\User\\Documents\\NetBeansProjects\\NC_Lab1"));
+            fc.setCurrentDirectory(new File("C:\\Users\\User\\Documents\\NetBeansProjects\\MusicLibrary"));
 
             if (changed) {
                 int i = JOptionPane.showConfirmDialog(null, "Хотите ли Вы сохранить изменения?", "Open", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE);
-                if (i == 0) {
+                if (i == 0) {//хотим сохранить изменения
 
-                    if (fc.showSaveDialog(null) == JFileChooser.APPROVE_OPTION) {
+                    if (fc.showSaveDialog(null) == JFileChooser.APPROVE_OPTION) {//название файла не пустое
 
                         ctrl.save(fc.getSelectedFile().getName());
 
                     }
-                    fileopen = new JFileChooser();
-                    if (fileopen.showDialog(null, "Открыть файл") == JFileChooser.APPROVE_OPTION) {
+                    fileopen = new JFileChooser();  //окошко для открытия файла
+                    if (fileopen.showDialog(null, "Открыть файл") == JFileChooser.APPROVE_OPTION) { //выбран файл
                         ctrl.load(fileopen.getSelectedFile().getName());
-                        findAndShowInTable(FindTrack.ByAllTrack, "");
+                        startState();
                     }
                 } else if (i == 1) {
                     fileopen = new JFileChooser();
                     if (fileopen.showDialog(null, "Открыть файл") == JFileChooser.APPROVE_OPTION) {
                         ctrl.load(fileopen.getSelectedFile().getName());
-                        findAndShowInTable(FindTrack.ByAllTrack, "");
+                        startState();
                     }
                 }
             } else if (fileopen.showDialog(null, "Открыть файл") == JFileChooser.APPROVE_OPTION) {
                 ctrl.load(fileopen.getSelectedFile().getName());
-                findAndShowInTable(FindTrack.ByAllTrack, "");
+                startState();
             }
 
         } catch (IOException ex) {
@@ -651,7 +651,7 @@ public class GUI extends javax.swing.JFrame {
                 param.add(model.getValueAt(jTable.getSelectedRow(), 5).toString());
 
                 ctrl.updateTrack(param);
-                findAndShowInTable(FindTrack.ByAllTrack, "");
+                startState();
 
             } catch (Exception ex) {
                 errorMessage("Ошибка при обновлении трека");
@@ -664,11 +664,29 @@ public class GUI extends javax.swing.JFrame {
 
     private void jMenuItemImportActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemImportActionPerformed
         changed = true;
-        // TODO add your handling code here:
+         JFileChooser fileopen = new JFileChooser();
+
+        fileopen.setCurrentDirectory(new File("C:\\Users\\User\\Documents\\NetBeansProjects\\MusicLibrary"));
+        
+        fileopen = new JFileChooser();
+                    if (fileopen.showDialog(null, "Импортировать файл") == JFileChooser.APPROVE_OPTION) {
+            try {
+                ctrl.importTracks(fileopen.getSelectedFile().getName());
+                startState();
+            } catch (IOException ex) {
+                errorMessage("Ошибка при импорте");
+            }
+                    }
+        
     }//GEN-LAST:event_jMenuItemImportActionPerformed
 
     private void jOpenDefaultActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jOpenDefaultActionPerformed
-        startState();
+        try {
+            ctrl.load("defaultFile.muslib");
+            startState();
+        } catch (IOException e) {
+            errorMessage("Файл не найден");
+        }
     }//GEN-LAST:event_jOpenDefaultActionPerformed
 
     private void jBFindActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jBFindActionPerformed
@@ -715,9 +733,9 @@ public class GUI extends javax.swing.JFrame {
 
         JFileChooser fc = new JFileChooser();
         //для фильтрации по формату
-        FileNameExtensionFilter filter = new FileNameExtensionFilter("*.genre,*.track,*.*");
-        fc.setFileFilter(filter);
-        fc.setCurrentDirectory(new File("C:\\Users\\User\\Documents\\NetBeansProjects\\NC_Lab1"));
+//        FileNameExtensionFilter filter = new FileNameExtensionFilter("*.genre,*.track,*.*");
+//        fc.setFileFilter(filter);
+        fc.setCurrentDirectory(new File("C:\\Users\\User\\Documents\\NetBeansProjects\\MusicLibrary"));
 
         if (fc.showSaveDialog(null) == JFileChooser.APPROVE_OPTION) {
             try {
@@ -729,15 +747,17 @@ public class GUI extends javax.swing.JFrame {
     }//GEN-LAST:event_jMenuItemSaveActionPerformed
 
     private void jMenuItemExitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemExitActionPerformed
-
-        int i = JOptionPane.showConfirmDialog(null, "Хотите ли Вы сохранить изменения?", "Save", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE);
+        int i = 1;
+        if (changed) {
+            i = JOptionPane.showConfirmDialog(null, "Хотите ли Вы сохранить изменения?", "Save", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE);
+        }
         if (i == 0) {
 
             JFileChooser fc = new JFileChooser();
             //для фильтрации по формату
-            FileNameExtensionFilter filter = new FileNameExtensionFilter("*.genre,*.track,*.*");
-            fc.setFileFilter(filter);
-            fc.setCurrentDirectory(new File("C:\\Users\\User\\Documents\\NetBeansProjects\\NC_Lab1"));
+            //FileNameExtensionFilter filter = new FileNameExtensionFilter("*.genre,*.track,*.*");
+            //fc.setFileFilter(filter);
+            fc.setCurrentDirectory(new File("C:\\Users\\User\\Documents\\NetBeansProjects\\MusicLibrary"));
 
             if (fc.showSaveDialog(null) == JFileChooser.APPROVE_OPTION) {
                 try {
@@ -749,15 +769,16 @@ public class GUI extends javax.swing.JFrame {
         } else if (i == 1) {
             System.exit(0);
         }
+
     }//GEN-LAST:event_jMenuItemExitActionPerformed
 
     private void jMenuItemSaveAsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemSaveAsActionPerformed
 
         JFileChooser fc = new JFileChooser();
         //для фильтрации по формату
-        FileNameExtensionFilter filter = new FileNameExtensionFilter("*.genre,*.track,*.*");
-        fc.setFileFilter(filter);
-        fc.setCurrentDirectory(new File("C:\\Users\\User\\Documents\\NetBeansProjects\\NC_Lab1"));
+//        FileNameExtensionFilter filter = new FileNameExtensionFilter("*.genre,*.track,*.*");
+//        fc.setFileFilter(filter);
+        fc.setCurrentDirectory(new File("C:\\Users\\User\\Documents\\NetBeansProjects\\MusicLibrary"));
 
         if (fc.showSaveDialog(null) == JFileChooser.APPROVE_OPTION) {
             try {

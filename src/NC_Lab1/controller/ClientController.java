@@ -20,13 +20,15 @@ public class ClientController {
 
     private static ClientController controller = new ClientController();
 
+ 
+
     public enum NumberOperation {
 
         addTrack, addGenre,
         findTrackById, findTrackByName, findTrackByGenre, findTrackByArtist, findTrackByAlbum, findTrackByLength,
         findGenreById, findGenreByName,
         findAllTrack, findAllGenre,
-        loadTrackAndGenre, saveTrackAndGenre,
+        loadTrackAndGenre, saveTrackAndGenre,importTracks,
         removeTrackById, removeGenreById, removeGenreByName, removeAllTrack, removeAllGenre,
         updateTrack, updateGenre,;
     };
@@ -44,6 +46,15 @@ public class ClientController {
             oout = new ObjectOutputStream(sout);
         } catch (IOException x) {
             x.printStackTrace();
+        }
+    }
+    
+       public void importTracks(String str) throws IOException {
+        oout.writeObject(NumberOperation.importTracks);
+        oout.writeUTF(str);
+        oout.flush();
+        if (oin.readInt() == -1) {
+            throw new IOException();
         }
     }
 
@@ -122,7 +133,7 @@ public class ClientController {
         oout.writeObject(NumberOperation.findTrackById);
         oout.writeLong(id);
         oout.flush();
-        ArrayList<String> answerFromServer;
+        ArrayList<String> answerFromServer = new ArrayList();
         if (oin.readInt() == -1) {
             throw new Exception();
         } else {
@@ -135,7 +146,7 @@ public class ClientController {
         oout.writeObject(NumberOperation.findTrackByName);
         oout.writeUTF(name);
         oout.flush();
-        ArrayList<String> answerFromServer;
+        ArrayList<String> answerFromServer = new ArrayList();
         if (oin.readInt() == -1) {
             throw new IOException();
         }
@@ -148,7 +159,7 @@ public class ClientController {
         oout.writeObject(NumberOperation.findTrackByArtist);
         oout.writeUTF(name);
         oout.flush();
-        ArrayList<String> answerFromServer;
+        ArrayList<String> answerFromServer  = new ArrayList();
         if (oin.readInt() == -1) {
             throw new IOException();
         }
@@ -160,7 +171,7 @@ public class ClientController {
         oout.writeObject(NumberOperation.findTrackByAlbum);
         oout.writeUTF(name);
         oout.flush();
-        ArrayList<String> answerFromServer;
+        ArrayList<String> answerFromServer= new ArrayList();
         if (oin.readInt() == -1) {
             throw new IOException();
         }
@@ -172,7 +183,7 @@ public class ClientController {
         oout.writeObject(NumberOperation.findTrackByGenre);
         oout.writeUTF(genre);
         oout.flush();
-        ArrayList<String> answerFromServer;
+        ArrayList<String> answerFromServer= new ArrayList();
         if (oin.readInt() == -1) {
             throw new IOException();
         }
@@ -183,7 +194,7 @@ public class ClientController {
     public ArrayList<String> findAllTracks() throws IOException, ClassNotFoundException {
         oout.writeObject(NumberOperation.findAllTrack);
         oout.flush();
-        ArrayList<String> answerFromServer;
+        ArrayList<String> answerFromServer= new ArrayList();
         if (oin.readInt() == -1) {
             throw new IOException();
         } else {
@@ -222,7 +233,7 @@ public class ClientController {
         oout.writeObject(NumberOperation.findGenreById);
         oout.writeLong(id);
         oout.flush();
-        ArrayList<String> answerFromServer;
+        ArrayList<String> answerFromServer = new ArrayList();;
         if (oin.readInt() == -1) {
             throw new IOException();
         }
@@ -234,7 +245,7 @@ public class ClientController {
         oout.writeObject(NumberOperation.findGenreByName);
         oout.writeUTF(name);
         oout.flush();
-        ArrayList<String> answerFromServer;
+        ArrayList<String> answerFromServer = new ArrayList();
         if (oin.readInt() == -1) {
             throw new IOException();
         }
@@ -245,7 +256,7 @@ public class ClientController {
     public ArrayList<String> findAllGenre() throws IOException, ClassNotFoundException {
         oout.writeObject(NumberOperation.findAllGenre);
         oout.flush();
-        ArrayList<String> answerFromServer;
+        ArrayList<String> answerFromServer = new ArrayList();
         if (oin.readInt() == -1) {
             throw new IOException();
         }

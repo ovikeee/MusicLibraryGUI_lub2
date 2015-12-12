@@ -10,15 +10,15 @@ import java.util.Scanner;
  */
 public class starter {
     //есть файл с треками: saveFile1
-//    public static void main(String[] args)  {
+    public static void main(String[] args)  {
         
        
                
 //        Консолька
-//        View viewshka = View.getInstance();
-//        viewshka.show_start();
-//        while(viewshka.show_dialog_start()!=0){
-//        }
+        View viewshka = View.getInstance();
+        viewshka.show_start();
+        while(viewshka.show_dialog_start()!=0){
+        }
 //        
         //GUI-шка
        // TrackStorage.loadFromFile("saveFile1");
@@ -27,7 +27,7 @@ public class starter {
 //        gui.startState();
        
     }
-   
+}
     
 
 //}

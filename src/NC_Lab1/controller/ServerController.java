@@ -4,9 +4,14 @@ import NC_Lab1.Model.Genre;
 import NC_Lab1.Model.GenreStorage;
 import NC_Lab1.Model.Track;
 import NC_Lab1.Model.TrackStorage;
-import NC_Lab1.Util.IdGenerator;
+import NC_Lab1.Util.FileManager;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.util.ArrayList;
-import java.util.Iterator;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  *
@@ -181,8 +186,9 @@ public class ServerController {
      * @param str
      */
     public void load(String str) {
-        TrackStorage.loadFromFile(str + ".track");
-        GenreStorage.loadFromFile(str + ".genre");
+        //TrackStorage.loadFromFile(str + ".track");
+        //GenreStorage.loadFromFile(str + ".genre");
+        FileManager.loadFromFile(str);
     }
 
     //требуется исправление на FileManeger
@@ -193,13 +199,40 @@ public class ServerController {
      * @param str имя файла
      */
     public void save(String str) {
-        TrackStorage.storeToFile(str + ".track");
-        GenreStorage.storeToFile(str + ".genre");
-//        fileManager.saveToFile(str);
+        //TrackStorage.storeToFile(str + ".track");
+        //GenreStorage.storeToFile(str + ".genre");
+        FileManager.saveToFile(str);
     }
 
     protected Object readResolve() {
-        return getInstance();
+        return controller;
+        //return getInstance();//!!!!!!!!!!!!!!!!!!!!!!!!!
+    }
+
+    public void importTracks(String filename) {
+          try(ObjectInputStream ois = new ObjectInputStream(new FileInputStream(new File(filename)));) {
+            HashMap<Long,Track> tracks = (HashMap<Long, Track>)ois.readObject();
+            HashMap<Long, Genre> genres = (HashMap<Long, Genre>)ois.readObject();   
+    
+              for (Map.Entry<Long, Genre> entry : genres.entrySet()) {
+                  if(GenreStorage.getByTitle(entry.getValue().getName())==null){//если  такого жанра нет, то создаем новый
+                  
+                      GenreStorage.addGenre(entry.getValue()); 
+                      //всем трекам назначить 
+                  }
+              }
+//               for (Map.Entry<Long, Track> entry : tracks.entrySet()) {
+//                  if(TrackStorage.getById(entry.getKey())==null){//если id такого трека нет, то создаем новый
+//                  
+//                      TrackStorage.addTrack(entry.getValue());
+//                  }
+//              }
+            
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
     }
 
     private static class SingletonHelper {

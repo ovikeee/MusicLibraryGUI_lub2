@@ -111,19 +111,14 @@ class ConnectorThread extends Thread {
                 try {
                     System.out.println("");
 
-                    ArrayList<String> parametrs = new ArrayList();
                     ArrayList<String> answer = new ArrayList();
-                    ArrayList<Track> tracks = new ArrayList();
-                    ArrayList<Genre> genres = new ArrayList();
 
                     codeOperation = (NumberOperation) oin.readObject();
                     System.out.println("Была вызвана операция: " + codeOperation.toString());
 
                     switch (codeOperation) {
                         case addTrack:
-                            parametrs.addAll((ArrayList<String>) oin.readObject());
-                            System.out.println("Parametrs: " + parametrs);
-                            ctrl.addTrack(parametrs);
+                            ctrl.addTrack((ArrayList<String>) oin.readObject());
                             sendAnswer(1, null);
                             break;
                         case addGenre:
@@ -178,6 +173,10 @@ class ConnectorThread extends Thread {
                             ctrl.save(oin.readUTF());
                             sendAnswer(1, null);
                             break;
+                        case importTracks:
+                            ctrl.importTracks(oin.readUTF());
+                            sendAnswer(1, null);
+                            break;
                         case removeTrackById:
                             ctrl.removeTrackById(oin.readLong());
                             sendAnswer(1, null);
@@ -203,8 +202,7 @@ class ConnectorThread extends Thread {
                             sendAnswer(1, null);
                             break;
                         case updateGenre:
-                            parametrs = (ArrayList<String>) oin.readObject();
-                            ctrl.updateGenre(parametrs);
+                            ctrl.updateGenre((ArrayList<String>) oin.readObject());
                             sendAnswer(1, null);
                             break;
                     }

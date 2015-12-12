@@ -1,9 +1,12 @@
 package NC_Lab1.Util;
 
+import NC_Lab1.Model.Genre;
 import NC_Lab1.Model.GenreStorage;
+import NC_Lab1.Model.Track;
 import NC_Lab1.Model.TrackStorage;
 
 import java.io.*;
+import java.util.HashMap;
 
 /**
  * Created by azaz on 28/10/15.
@@ -16,9 +19,6 @@ public class FileManager implements Serializable {
     private IdGenerator idGenerator;
 
     private FileManager() {
-        genreStorage = GenreStorage.getInstance();
-        trackStorage = TrackStorage.getInstance();
-        idGenerator = IdGenerator.getInstance();
     }
 
     public static FileManager getInstance() {
@@ -27,18 +27,19 @@ public class FileManager implements Serializable {
 
     public static void loadFromFile(String filename) {
         try(ObjectInputStream ois = new ObjectInputStream(new FileInputStream(new File(filename)));) {
-            instance = (FileManager) ois.readObject();
-           // GenreStorage.loadFromFile(filename);
+            TrackStorage.setStorage((HashMap<Long, Track>)ois.readObject());
+            GenreStorage.setStorage((HashMap<Long, Genre>)ois.readObject());           
         } catch (IOException e) {
             e.printStackTrace();
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
-        }
+        }//
     }
 
     public static void saveToFile(String filename) {
-        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(new File(filename)))) {
-            oos.writeObject(instance);
+        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(new File(filename+".muslib")))) {
+            oos.writeObject(TrackStorage.getStorage());
+            oos.writeObject(GenreStorage.getStorage());
         } catch (IOException e) {
             e.printStackTrace();
         }

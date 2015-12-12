@@ -217,6 +217,7 @@ public class GenreFrame extends javax.swing.JFrame {
             errorMessage("Ошибка ввода/вывода!");
         }
         showTable(FindGenre.ByAllGenres, "");
+        
 
     }//GEN-LAST:event_jButtonAddActionPerformed
 
