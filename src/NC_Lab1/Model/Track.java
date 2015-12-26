@@ -1,5 +1,6 @@
 package NC_Lab1.Model;
 
+import NC_Lab1.Util.FileManager;
 import NC_Lab1.Util.IdGenerator;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -20,26 +21,15 @@ public class Track implements Serializable {
     private String title;
     private String album;
     private String artist;
-    private String genre;
+    private Genre genre;
 
-    public String getGenre() {
-        return genre;
-    }
-
-    public Track(String title, String artist, String albumName, long length, String genre) {
+    public Track(String title, String artist, String albumName, long length, Genre genre) {
         this.id = IdGenerator.getInstance().GetNextId();
         this.length = length;
         this.title = title;
         this.album = albumName;
         this.artist = artist;
         this.genre = genre;
-        //если такого жанра нету, то создаем
-
-        if (GenreStorage.getByTitle(genre) == null) {
-            System.out.println("Жанр не был найден.");
-            GenreStorage.addGenre(genre);
-            System.out.println("Создан новый жанр: " + genre);
-        }
 
     }
 
@@ -57,38 +47,19 @@ public class Track implements Serializable {
         track.add(artist);
         track.add(album);
         track.add(length + "");
-        track.add(genre);
+        track.add(genre.getName());
         return track;
     }
 
-    public void setGenre(String newGenre) {
+    public void setGenre(Genre newGenre) {
         genre = newGenre;
-        if (GenreStorage.getByTitle(genre) == null) {
-            System.out.println("Жанр не был найден.");
-            GenreStorage.addGenre(genre);
-            System.out.println("Создан новый жанр: " + genre);
-        }
-
     }
 
-    public void setAllParam(ArrayList<String> al) {
-        if (al.size() == 5) {
-            title = al.get(0);
-            artist = al.get(1);
-            album = al.get(2);
-            length = Long.parseLong(al.get(3));
-            setGenre(al.get(4));
-
-        } else {
-            title = al.get(1);
-            artist = al.get(2);
-            album = al.get(3);
-            length = Long.parseLong(al.get(4));
-            setGenre(al.get(5));
-
-        }
-
+    public Genre getGenre() {
+        return genre;
     }
+
+
 
     public long getId() {
         return id;
@@ -131,3 +102,18 @@ public class Track implements Serializable {
     }
 
 }
+//  public void setAllParam(ArrayList<String> al) {
+//        if (al.size() == 4) {
+//            title = (String) al.get(0);
+//            artist = (String) al.get(1);
+//            album = (String) al.get(2);
+//            length = Long.parseLong((String)al.get(3));
+//            setGenre((Genre) al.get(4));
+//        } else {
+//            title = (String) al.get(1);
+//            artist = (String) al.get(2);
+//            album = (String) al.get(3);
+//            length = Long.parseLong((String)al.get(4));
+//            setGenre((Genre) al.get(5));
+//        }
+//    }

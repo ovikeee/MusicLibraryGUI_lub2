@@ -15,41 +15,46 @@ import java.util.ArrayList;
  */
 public class ClientController {
 
-    private static ObjectOutputStream oout;
-    private static ObjectInputStream oin;
+     ObjectOutputStream oout;
+     ObjectInputStream oin;
 
-    private static ClientController controller = new ClientController();
-
- 
-
+ //   private static ClientController controller = new ClientController();
     public enum NumberOperation {
-
         addTrack, addGenre,
         findTrackById, findTrackByName, findTrackByGenre, findTrackByArtist, findTrackByAlbum, findTrackByLength,
         findGenreById, findGenreByName,
         findAllTrack, findAllGenre,
-        loadTrackAndGenre, saveTrackAndGenre,importTracks,
+        loadTrackAndGenre, saveTrackAndGenre, importTracks,
         removeTrackById, removeGenreById, removeGenreByName, removeAllTrack, removeAllGenre,
         updateTrack, updateGenre,;
     };
 
-    //FileManager fileManager = FileManager.getInstance();
-    private ClientController() {
+    String fileManager;
+
+    public ClientController(String fileManagerString) {
+        fileManager = fileManagerString;
+    }
+
+    public void startClient() {
         int serverPort = 7777;          // порт сервера (его знают все клиенты, для подключения к серверу)
         String address = "127.0.0.1";   // IP Сервера
         try {
             InetAddress ipAddress = InetAddress.getByName(address);
             Socket socket = new Socket(ipAddress, serverPort);
-            InputStream sin = socket.getInputStream();
-            OutputStream sout = socket.getOutputStream();
-            oin = new ObjectInputStream(sin);
-            oout = new ObjectOutputStream(sout);
+         //   InputStream sin =socket.getInputStream(); 
+         //   OutputStream sout =socket.getOutputStream() ;
+            oout = new ObjectOutputStream(socket.getOutputStream());
+            oout.flush();
+            oin = new ObjectInputStream(socket.getInputStream());
+            oout.writeObject(NumberOperation.loadTrackAndGenre);
+            oout.writeUTF(fileManager);
+            oout.flush();
         } catch (IOException x) {
             x.printStackTrace();
         }
     }
-    
-       public void importTracks(String str) throws IOException {
+
+    public void importTracks(String str) throws IOException {
         oout.writeObject(NumberOperation.importTracks);
         oout.writeUTF(str);
         oout.flush();
@@ -58,10 +63,10 @@ public class ClientController {
         }
     }
 
-    public static ClientController getInstance() {
-        //TrackStorage.loadFromFile("defaultFile");
-        return controller;
-    }
+//    public static ClientController getInstance() {
+//        //TrackStorage.loadFromFile("defaultFile");
+//        return controller;
+//    }
 
     public void addTrack(ArrayList<String> str) throws IOException {
         System.out.println("A zdes' ParametrsCli = " + str);
@@ -159,7 +164,7 @@ public class ClientController {
         oout.writeObject(NumberOperation.findTrackByArtist);
         oout.writeUTF(name);
         oout.flush();
-        ArrayList<String> answerFromServer  = new ArrayList();
+        ArrayList<String> answerFromServer = new ArrayList();
         if (oin.readInt() == -1) {
             throw new IOException();
         }
@@ -171,7 +176,7 @@ public class ClientController {
         oout.writeObject(NumberOperation.findTrackByAlbum);
         oout.writeUTF(name);
         oout.flush();
-        ArrayList<String> answerFromServer= new ArrayList();
+        ArrayList<String> answerFromServer = new ArrayList();
         if (oin.readInt() == -1) {
             throw new IOException();
         }
@@ -183,7 +188,7 @@ public class ClientController {
         oout.writeObject(NumberOperation.findTrackByGenre);
         oout.writeUTF(genre);
         oout.flush();
-        ArrayList<String> answerFromServer= new ArrayList();
+        ArrayList<String> answerFromServer = new ArrayList();
         if (oin.readInt() == -1) {
             throw new IOException();
         }
@@ -194,7 +199,7 @@ public class ClientController {
     public ArrayList<String> findAllTracks() throws IOException, ClassNotFoundException {
         oout.writeObject(NumberOperation.findAllTrack);
         oout.flush();
-        ArrayList<String> answerFromServer= new ArrayList();
+        ArrayList<String> answerFromServer = new ArrayList();
         if (oin.readInt() == -1) {
             throw new IOException();
         } else {

@@ -134,7 +134,12 @@ public class Client {
 
         gui = new GUI();
         gui.setVisible(true);
+        gui.startController();
+       
        // gui.startState();//загружает какой-то дефолтный файл
 
     }
+    
+    
+    
 }

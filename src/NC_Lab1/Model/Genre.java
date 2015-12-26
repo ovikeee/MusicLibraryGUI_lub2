@@ -12,46 +12,26 @@ import java.util.Set;
  */
 public class Genre implements Serializable {
 
-    private long idGenre;
     private String name;
- 
- 
-
-
+    private Set<Track> trackList;
 
     public Genre(String name) {
-        this.idGenre = IdGenerator.getInstance().GetNextId();
         this.name = name;
-    }
-
-    public static Set<Genre> getAll() {
-        Set<Genre> set = new HashSet<>();
-        for (Map.Entry<Long, Genre> longGenreEntry : GenreStorage.getStorage().entrySet()) {
-            set.add(longGenreEntry.getValue());
-        }
-        return set;
+        trackList = new HashSet<>();
 
     }
 
     @Override
-    public String toString() {
-        return idGenre + " " + name;
+    public String toString(){
+    return name;
+    }
+    
+    public void addInTrackList(Track track) {
+        trackList.add(track);
     }
 
-    public ArrayList<String> toArrayListString() {
-        ArrayList<String> genre = new ArrayList<String>();
-        genre.add(idGenre + "");
-        genre.add(name);
-        return genre;
-    }
-
-    public long getId_genre() {
-
-        return idGenre;
-    }
-
-    public void setId_genre(long idGenre) {
-        this.idGenre = idGenre;
+    public Set<Track> getTrackList() {
+        return trackList;
     }
 
     public String getName() {

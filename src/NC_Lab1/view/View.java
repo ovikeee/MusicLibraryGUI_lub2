@@ -1,5 +1,6 @@
 package NC_Lab1.view;
 
+import NC_Lab1.Util.FileManager;
 import NC_Lab1.controller.ClientController;
 import NC_Lab1.controller.ServerController;
 import java.util.ArrayList;
@@ -8,7 +9,7 @@ import java.util.StringTokenizer;
 
 public class View {
 
-    private static ServerController ctrl = ServerController.getInstance();
+    private static ServerController ctrl = new ServerController(new FileManager("default"));//ServerController.getInstance();
     private static View view = new View();
     private final Scanner scan = new Scanner(System.in);
 
@@ -147,7 +148,7 @@ public class View {
                 ctrl.load(scan.next());
                 break;
             case 4:
-                ctrl.load("defaultFile.muslib");
+                ctrl.load("default.muslib");
                 break;
             case 0:
                 show_dialog_start();
@@ -246,10 +247,6 @@ public class View {
     private void show_dialog_Find_Genre() {
         System.out.println("Выберите метод поиска жанра(1,2,3,0)\nиспользуйте  \"*\"-для замены любого символа\n\"?\"-для замены нескольких символов:\n1)Поиск по номеру жанра.\n2)Поиск по названию жанра.\n3)Поиск всех.\n0)Отмена.");
         switch (scan.nextInt()) {
-            case 1:
-                System.out.print("Введите номер жанра: ");
-                query_results_genres(ctrl.findGenreById(scan.nextLong()));
-                break;
             case 2:
                 System.out.print("Введите название жанра: ");
                 query_results_genres(ctrl.findGenreByTitle(scan.next()));
@@ -310,7 +307,7 @@ public class View {
     }
 
     public void show_dialog_save() {
-        System.out.println("Выберите действие (1,2,0):\n1)Сохранить добавленые треки в файл.\n2)Сохранить добавленые жанры в файл.\n0)Отмена.");
+        System.out.println("Выберите действие (1,0):\n1)Сохранить добавленые треки в файл.\n0)Отмена.");
         switch (scan.nextInt()) {
             case 1:
                 System.out.print("Введите название файла: ");

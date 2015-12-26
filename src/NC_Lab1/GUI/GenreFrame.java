@@ -15,16 +15,18 @@ import javax.swing.table.DefaultTableModel;
  */
 public class GenreFrame extends javax.swing.JFrame {
 
-    private static ClientController ctrl = ClientController.getInstance();
-    ArrayList<String> strings;
-    ArrayList<String> param;
+    private static ClientController ctrl;// = new ClientController("default");// ClientController.getInstance();
+    ArrayList<String> strings = new ArrayList<>();
+    ArrayList<String> param = new ArrayList<>();
 
     public enum FindGenre {
+
         ById, ByName, ByAllGenres
     };
 
-    public GenreFrame() {
+    public GenreFrame(ClientController cl) {
         initComponents();
+        ctrl = cl;
     }
 
     public void startState() {
@@ -39,9 +41,6 @@ public class GenreFrame extends javax.swing.JFrame {
         try {
 
             switch (findGenre) {
-                case ById:
-                    strings = ctrl.findGenreById(Long.parseLong(str));
-                    break;
                 case ByName:
                     strings = ctrl.findGenreByName(str);
                     break;
@@ -57,14 +56,9 @@ public class GenreFrame extends javax.swing.JFrame {
             errorMessage("ClassNotFoundException!");
         }
 
-        StringTokenizer st;
-        for (String string: strings) {
-            st = new StringTokenizer(string);
-            
+        for (String string : strings) {
             model.addRow(
-                    new Object[]{
-                        st.nextToken(),
-                        st.nextToken(),}
+                    new Object[]{string}
             );
         }
 
@@ -77,7 +71,6 @@ public class GenreFrame extends javax.swing.JFrame {
         jTF_Find = new javax.swing.JTextField();
         jButton1 = new javax.swing.JButton();
         jLabel1 = new javax.swing.JLabel();
-        jComboBoxFind = new javax.swing.JComboBox();
         jLabel2 = new javax.swing.JLabel();
         jTextFieldNewGenre = new javax.swing.JTextField();
         jLabel3 = new javax.swing.JLabel();
@@ -94,9 +87,17 @@ public class GenreFrame extends javax.swing.JFrame {
 
             },
             new String [] {
-                "Id", "Name"
+                "Name"
             }
-        ));
+        ) {
+            boolean[] canEdit = new boolean [] {
+                false
+            };
+
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return canEdit [columnIndex];
+            }
+        });
         jScrollPane1.setViewportView(jTable1);
 
         jButton1.setText("Найти");
@@ -107,8 +108,6 @@ public class GenreFrame extends javax.swing.JFrame {
         });
 
         jLabel1.setText("Поиск жанров:");
-
-        jComboBoxFind.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Id", "Name" }));
 
         jLabel2.setText("Новый жанр:");
 
@@ -156,23 +155,20 @@ public class GenreFrame extends javax.swing.JFrame {
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
                     .addComponent(jLabel1, javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
-                        .addComponent(jButton1)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jButton4))
                     .addComponent(jLabel2, javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jButtonAdd, javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
-                        .addComponent(jTF_Find, javax.swing.GroupLayout.PREFERRED_SIZE, 136, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jComboBoxFind, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
                         .addComponent(jLabel3)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jTextFieldNewGenre))
-                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                        .addComponent(jButtonRemove, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(jButtonUpdate, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 82, Short.MAX_VALUE)))
+                        .addComponent(jTextFieldNewGenre, javax.swing.GroupLayout.DEFAULT_SIZE, 107, Short.MAX_VALUE))
+                    .addComponent(jButtonRemove, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jButtonUpdate, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                        .addComponent(jTF_Find, javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
+                            .addComponent(jButton1)
+                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                            .addComponent(jButton4))))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 31, Short.MAX_VALUE)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 125, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
@@ -183,9 +179,7 @@ public class GenreFrame extends javax.swing.JFrame {
                 .addGap(5, 5, 5)
                 .addComponent(jLabel1)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jTF_Find, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jComboBoxFind, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addComponent(jTF_Find, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jButton1)
@@ -217,7 +211,7 @@ public class GenreFrame extends javax.swing.JFrame {
             errorMessage("Ошибка ввода/вывода!");
         }
         showTable(FindGenre.ByAllGenres, "");
-        
+
 
     }//GEN-LAST:event_jButtonAddActionPerformed
 
@@ -234,14 +228,7 @@ public class GenreFrame extends javax.swing.JFrame {
         if (jTF_Find.getText().equals("")) {
             errorMessage("Введите в поле поиска значение!");
         } else {
-            switch (jComboBoxFind.getSelectedItem().toString()) {//Id, Name
-                case "Id":
-                    showTable(FindGenre.ById, jTF_Find.getText());
-                    break;
-                case "Name":
-                    showTable(FindGenre.ByName, jTF_Find.getText());
-                    break;
-            }
+            showTable(FindGenre.ByName, jTF_Find.getText());
         }
     }//GEN-LAST:event_jButton1ActionPerformed
 
@@ -259,7 +246,7 @@ public class GenreFrame extends javax.swing.JFrame {
             }
         } else {
             try {
-                ctrl.removeGenreById(Long.parseLong(model.getValueAt(jTable1.getSelectedRow(), 0).toString()));
+                ctrl.removeGenreByName(model.getValueAt(jTable1.getSelectedRow(), 0).toString());
                 model.removeRow(jTable1.getSelectedRow());
             } catch (Exception ex) {
                 errorMessage("Ошибка при удалении трека");
@@ -279,10 +266,9 @@ public class GenreFrame extends javax.swing.JFrame {
             }
         } else {
             try {
-                
                 param.clear();
                 param.add(model.getValueAt(jTable1.getSelectedRow(), 0).toString());
-                param.add(model.getValueAt(jTable1.getSelectedRow(), 1).toString());
+                param.add(jTextFieldNewGenre.getText());
                 ctrl.updateGenre(param);
                 showTable(FindGenre.ByAllGenres, "");
             } catch (Exception ex) {
@@ -300,7 +286,6 @@ public class GenreFrame extends javax.swing.JFrame {
     private javax.swing.JButton jButtonAdd;
     private javax.swing.JButton jButtonRemove;
     private javax.swing.JButton jButtonUpdate;
-    private javax.swing.JComboBox jComboBoxFind;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;

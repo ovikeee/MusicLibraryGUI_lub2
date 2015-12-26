@@ -19,17 +19,23 @@ import java.util.Map;
  */
 public class ServerController {
 
-    private static ServerController controller = SingletonHelper.INSTANCE;
+    // private static ServerController controller;// = SingletonHelper.INSTANCE;
+    private FileManager fileManager;
 
-    //FileManager fileManager = FileManager.getInstance();
-    private ServerController() {
+    /**
+     * При создании контроллера инициализируются поля: fileManager.getTrackStorage() fileManager.getGenreStorage()
+     */
+    public ServerController(FileManager fileManager) {
+        this.fileManager = fileManager;
+    }
+    public void setFileManager(FileManager newFileManager){
+    fileManager = newFileManager;
     }
 
-    public static ServerController getInstance() {
-        //TrackStorage.loadFromFile("defaultFile");
-        return controller;
-    }
-
+//    public static ServerController getInstance() {
+//        //TrackStorage.loadFromFile("defaultFile");
+//        return controller;
+//    }
     //требуется генерация Id
     /**
      * Добавление трека или жанра param i
@@ -38,33 +44,33 @@ public class ServerController {
      * String albumName, String artist,long length, String genre)
      */
     public void addTrack(ArrayList<String> str) {
-        TrackStorage.addTrack(str.get(0), str.get(1), str.get(2), Long.parseLong(str.get(3)), str.get(4));
+        fileManager.getTrackStorage().addTrack(str.get(0), str.get(1), str.get(2), Long.parseLong((String)str.get(3)), str.get(4));
     }
 
     public void addGenre(String str) {
-        GenreStorage.addGenre(str);
+        fileManager.getGenreStorage().addGenre(str);
     }
 
     public void removeTrackById(long id) {
-        TrackStorage.removeTrackById(id);
+        fileManager.getTrackStorage().removeTrackById(id);
     }
 
     public void removeGenreById(long id) {
-        GenreStorage.removeGenreById(id);
+        fileManager.getGenreStorage().removeGenreById(id);
     }
 
     public void removeAllTracks() {
 
-        TrackStorage.removeAll();
+        fileManager.getTrackStorage().removeAll();
     }
 
     public void removeAllGenres() {
 
-        GenreStorage.removeAll();
+        fileManager.getGenreStorage().removeAll();
     }
 
     public void removeGenreByTitle(String name) {
-        GenreStorage.removeGenreByTitle(name);
+        fileManager.getGenreStorage().removeGenreByTitle(name);
     }
 
 //Добавлен функционал поиск треков по жанрам(нужно протестить работу)
@@ -81,14 +87,15 @@ public class ServerController {
      */
     public String findTrackById(Long id) {
         /*поиск по номеру трека*/
-        return TrackStorage.getById(id).toString();
+        if(fileManager.getTrackStorage().getById(id)==null)return null;
+        return fileManager.getTrackStorage().getById(id).toString();
     }
 
     public ArrayList<String> findTrackByTitle(String name) {
         /*поиск по всех треков с похожим названием*/
         ArrayList<Track> tracks = new ArrayList<>();
         ArrayList<String> answer = new ArrayList<>();
-        tracks.addAll(TrackStorage.getByTitle(name));
+        tracks.addAll(fileManager.getTrackStorage().getByTitle(name));
         for (int i = 0; i < tracks.size(); i++) {
             answer.add(tracks.get(i).toString());
         }
@@ -98,7 +105,7 @@ public class ServerController {
     public ArrayList<String> findTrackByArtist(String name) {
         ArrayList<Track> tracks = new ArrayList<>();
         ArrayList<String> answer = new ArrayList<>();
-        tracks.addAll(TrackStorage.getByArtist(name));
+        tracks.addAll(fileManager.getTrackStorage().getByArtist(name));
         for (int i = 0; i < tracks.size(); i++) {
             answer.add(tracks.get(i).toString());
         }
@@ -108,7 +115,7 @@ public class ServerController {
     public ArrayList<String> findTrackByAlbum(String name) {
         ArrayList<Track> tracks = new ArrayList<>();
         ArrayList<String> answer = new ArrayList<>();
-        tracks.addAll(TrackStorage.getByAlbum(name));
+        tracks.addAll(fileManager.getTrackStorage().getByAlbum(name));
         for (int i = 0; i < tracks.size(); i++) {
             answer.add(tracks.get(i).toString());
         }
@@ -118,7 +125,7 @@ public class ServerController {
     public ArrayList<String> findTrackByLength(Long name) {
         ArrayList<Track> tracks = new ArrayList<>();
         ArrayList<String> answer = new ArrayList<>();
-        tracks.addAll(TrackStorage.getByLength(name));
+        tracks.addAll(fileManager.getTrackStorage().getByLength(name));
         for (int i = 0; i < tracks.size(); i++) {
             answer.add(tracks.get(i).toString());
         }
@@ -128,7 +135,7 @@ public class ServerController {
     public ArrayList<String> findTrackByGenre(String genre) {
         ArrayList<Track> tracks = new ArrayList<>();
         ArrayList<String> answer = new ArrayList<>();
-        tracks.addAll(TrackStorage.getByGenre(genre));
+        tracks.addAll(fileManager.getTrackStorage().getByGenre(genre));
         for (int i = 0; i < tracks.size(); i++) {
             answer.add(tracks.get(i).toString());
         }
@@ -138,7 +145,7 @@ public class ServerController {
     public ArrayList<String> findAllTracks() {
         ArrayList<Track> tracks = new ArrayList<>();
         ArrayList<String> answer = new ArrayList<>();
-        tracks.addAll(TrackStorage.getAllTracks());
+        tracks.addAll(fileManager.getTrackStorage().getAllTracks());
         for (int i = 0; i < tracks.size(); i++) {
             answer.add(tracks.get(i).toString());
         }
@@ -153,30 +160,21 @@ public class ServerController {
      * @param id Id трека
      */
     public void updateTrack(ArrayList<String> str) {
-        TrackStorage.getById(Long.parseLong(str.get(0))).setAllParam(str);
+        fileManager.getTrackStorage().setAllParam(str);
     }
 
     public void updateGenre(ArrayList<String> param) {
-        GenreStorage.getById(Long.parseLong(param.get(0))).setName(param.get(1));
+        fileManager.getGenreStorage().getByTitle(param.get(0)).setName(param.get(1));
     }
 
-    public String findGenreById(long id) {
-        return GenreStorage.getById(id).toString();
-    }
 
     public String findGenreByTitle(String name) {
-        return GenreStorage.getByTitle(name).toString();
+        return fileManager.getGenreStorage().getByTitle(name).toString();
 
     }
 
     public ArrayList<String> findAllGenre() {
-        ArrayList<String> answer = new ArrayList<>();
-        ArrayList<Genre> genre = new ArrayList<>();
-        genre.addAll(GenreStorage.getAllGenre());
-        for (int i = 0; i < genre.size(); i++) {
-            answer.add(genre.get(i).toString());
-        }
-        return answer;
+        return fileManager.getGenreStorage().getAllGenre();
     }
 
     //требуется исправление на FileManeger
@@ -187,8 +185,8 @@ public class ServerController {
      */
     public void load(String str) {
         //TrackStorage.loadFromFile(str + ".track");
-        //GenreStorage.loadFromFile(str + ".genre");
-        FileManager.loadFromFile(str);
+        //fileManager.getGenreStorage().loadFromFile(str + ".genre");
+        fileManager.loadFromFile(str);
     }
 
     //требуется исправление на FileManeger
@@ -200,34 +198,36 @@ public class ServerController {
      */
     public void save(String str) {
         //TrackStorage.storeToFile(str + ".track");
-        //GenreStorage.storeToFile(str + ".genre");
-        FileManager.saveToFile(str);
+        //fileManager.getGenreStorage().storeToFile(str + ".genre");
+        fileManager.saveToFile(str);
     }
 
-    protected Object readResolve() {
-        return controller;
-        //return getInstance();//!!!!!!!!!!!!!!!!!!!!!!!!!
-    }
-
-    public void importTracks(String filename) {
-          try(ObjectInputStream ois = new ObjectInputStream(new FileInputStream(new File(filename)));) {
-            HashMap<Long,Track> tracks = (HashMap<Long, Track>)ois.readObject();
-            HashMap<Long, Genre> genres = (HashMap<Long, Genre>)ois.readObject();   
+//    protected Object readResolve() {
+//        return controller;
+//        //return getInstance();//!!!!!!!!!!!!!!!!!!!!!!!!!
+//    }
     
-              for (Map.Entry<Long, Genre> entry : genres.entrySet()) {
-                  if(GenreStorage.getByTitle(entry.getValue().getName())==null){//если  такого жанра нет, то создаем новый
-                  
-                      GenreStorage.addGenre(entry.getValue()); 
-                      //всем трекам назначить 
-                  }
-              }
+    public void replaceFileManager(FileManager newFileManager){
+    fileManager = newFileManager;//!!!!! kosyak maybe
+    }
+    public void importTracks(String filename) {
+        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(new File(filename)));) {
+            HashMap<Long, Track> tracks = (HashMap<Long, Track>) ois.readObject();
+            HashMap<Long, Genre> genres = (HashMap<Long, Genre>) ois.readObject();
+
+            for (Map.Entry<Long, Genre> entry : genres.entrySet()) {
+                if (fileManager.getGenreStorage().getByTitle(entry.getValue().getName()) == null) {//если  такого жанра нет, то создаем новый
+                    fileManager.getGenreStorage().addGenre(entry.getValue());
+                    //всем трекам назначить 
+                }
+            }
 //               for (Map.Entry<Long, Track> entry : tracks.entrySet()) {
 //                  if(TrackStorage.getById(entry.getKey())==null){//если id такого трека нет, то создаем новый
 //                  
 //                      TrackStorage.addTrack(entry.getValue());
 //                  }
 //              }
-            
+
         } catch (IOException e) {
             e.printStackTrace();
         } catch (ClassNotFoundException e) {
@@ -235,10 +235,10 @@ public class ServerController {
         }
     }
 
-    private static class SingletonHelper {
-
-        private static final ServerController INSTANCE = new ServerController();
-    }
+//    private static class SingletonHelper {
+//
+//        private static final ServerController INSTANCE = new ServerController();
+//    }
 }
 
 //Ошибки, пока не обрабатываются.

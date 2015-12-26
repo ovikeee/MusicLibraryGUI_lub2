@@ -13,22 +13,41 @@ import java.util.HashMap;
  */
 public class FileManager implements Serializable {
 
-    private static FileManager instance = SingletonHelper.INSTANCE;
+    private FileManager instance;// = SingletonHelper.INSTANCE;
+    private int clientsCount = 0;
     private GenreStorage genreStorage;
     private TrackStorage trackStorage;
-    private IdGenerator idGenerator;
+    private String fileName;
 
-    private FileManager() {
+    //не синглтон
+    public FileManager(String fileName) {//относительный путь
+        this.fileName = fileName;
+        genreStorage = new GenreStorage();
+        trackStorage = new TrackStorage(this);
     }
 
-    public static FileManager getInstance() {
-        return instance;
+//    public  FileManager getInstance() {
+//        return instance;
+//    }
+    public String  getFileName(){
+    return fileName;
+    }
+    public void inc() {
+        ++clientsCount;
     }
 
-    public static void loadFromFile(String filename) {
-        try(ObjectInputStream ois = new ObjectInputStream(new FileInputStream(new File(filename)));) {
-            TrackStorage.setStorage((HashMap<Long, Track>)ois.readObject());
-            GenreStorage.setStorage((HashMap<Long, Genre>)ois.readObject());           
+    public void dec() {
+        --clientsCount;
+    }
+
+    public int getClientsCount() {
+        return clientsCount;
+    }
+
+    public void loadFromFile(String filename) {
+        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(new File(filename)));) {
+            trackStorage.setStorage((HashMap<Long, Track>) ois.readObject());
+            genreStorage.setStorage((HashMap<String, Genre>) ois.readObject());
         } catch (IOException e) {
             e.printStackTrace();
         } catch (ClassNotFoundException e) {
@@ -36,24 +55,29 @@ public class FileManager implements Serializable {
         }//
     }
 
-    public static void saveToFile(String filename) {
-        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(new File(filename+".muslib")))) {
-            oos.writeObject(TrackStorage.getStorage());
-            oos.writeObject(GenreStorage.getStorage());
+    public void saveToFile(String filename) {
+        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(new File(filename + ".muslib")))) {
+            oos.writeObject(trackStorage.getStorage());
+            oos.writeObject(genreStorage.getStorage());
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
+    public GenreStorage getGenreStorage() {
+        return genreStorage;
+    }
+
+    public TrackStorage getTrackStorage() {
+        return trackStorage;
+    }
+
     //обеспечивает ленивую инициализацию и синхронизацию
-    private static class SingletonHelper {
-
-        private static final FileManager INSTANCE= new FileManager();
-    }
-
+//    private class SingletonHelper {
+//        private final FileManager INSTANCE= new FileManager();
+//    }
     //обеспечивает правильную десериализацию Синглтона
-    protected Object readResolve() {
-        return getInstance();
-    }
-
+//    protected Object readResolve() {
+//        return getInstance();
+//    }
 }

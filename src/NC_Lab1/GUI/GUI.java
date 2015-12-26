@@ -18,7 +18,7 @@ import javax.swing.table.DefaultTableModel;
  */
 public class GUI extends javax.swing.JFrame {
 
-    private static ClientController ctrl = ClientController.getInstance();
+    private ClientController ctrl =new ClientController("default.muslib");// ClientController.getInstance();
     ArrayList<String> strings = new ArrayList<>();
     ArrayList<String> param = new ArrayList<>();
     private final String systemMessage = "all is good.";
@@ -26,6 +26,9 @@ public class GUI extends javax.swing.JFrame {
 
     public GUI() {
         initComponents();
+    }
+    public void startController(){
+        ctrl.startClient();
     }
 
     public void errorMessage(String msg) {
@@ -111,7 +114,6 @@ public class GUI extends javax.swing.JFrame {
             StringTokenizer st;
             for (String string : strings) {
                 st = new StringTokenizer(string);
-                st.nextToken();
                 jComboBoxGenre.addItem(st.nextToken());//инициализируем комбо бокс
             }
             findAndShowInTable(FindTrack.ByAllTrack, "");
@@ -804,7 +806,7 @@ public class GUI extends javax.swing.JFrame {
 
     //редактор жанров
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        GenreFrame genre_Frame = new GenreFrame();
+        GenreFrame genre_Frame = new GenreFrame(ctrl);
         genre_Frame.setVisible(true);
         genre_Frame.startState();
         genre_Frame.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
