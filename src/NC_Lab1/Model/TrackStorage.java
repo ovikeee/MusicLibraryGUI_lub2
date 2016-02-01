@@ -128,19 +128,14 @@ public class TrackStorage implements Serializable {
 
     public void setAllParam(ArrayList<String> al) {
         Track track = getById(Long.parseLong(al.get(0)));
-        if (al.size() == 4) {
-            track.setTitle(al.get(0));
-            track.setArtist(al.get(1));
-            track.setAlbum(al.get(2));
-            track.setLength(Long.parseLong(al.get(3)));
-            track.setGenre(fileManager.getGenreStorage().getByTitle(al.get(4)));
-        } else {
-            track.setTitle(al.get(1));
-            track.setArtist(al.get(2));
-            track.setAlbum(al.get(3));
-            track.setLength(Long.parseLong(al.get(4)));
-            track.setGenre(fileManager.getGenreStorage().getByTitle(al.get(5)));
+        track.setTitle(al.get(1));
+        track.setArtist(al.get(2));
+        track.setAlbum(al.get(3));
+        track.setLength(Long.parseLong(al.get(4)));
+        if (fileManager.getGenreStorage().getByTitle(al.get(5)) == null) {
+            fileManager.getGenreStorage().addGenre(al.get(5));
         }
+        track.setGenre(fileManager.getGenreStorage().getByTitle(al.get(5)));
     }
 
     public void removeTrackById(long idTrack) {

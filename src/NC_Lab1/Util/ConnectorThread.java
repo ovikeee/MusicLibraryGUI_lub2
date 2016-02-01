@@ -6,26 +6,21 @@
 package NC_Lab1.Util;
 
 import NC_Lab1.controller.ClientController;
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.OutputStream;
 import static java.lang.Thread.interrupted;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * Поток для регистрации клиентов на сервере. (Создает поток для работы с каждым
- * клиентом)
+ * Поток для регистрации клиентов на сервере. <br>
+ * Создает поток для работы с каждым клиентом. <br>
  */
 public class ConnectorThread extends Thread {
 

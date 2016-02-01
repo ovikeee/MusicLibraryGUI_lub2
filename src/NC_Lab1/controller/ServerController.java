@@ -12,6 +12,7 @@ import java.io.ObjectInputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.NoSuchElementException;
 
 /**
  *
@@ -23,13 +24,17 @@ public class ServerController {
     private FileManager fileManager;
 
     /**
-     * При создании контроллера инициализируются поля: fileManager.getTrackStorage() fileManager.getGenreStorage()
+     * При создании контроллера инициализируются поля:
+     * fileManager.getTrackStorage() fileManager.getGenreStorage()
+     *
+     * @param fileManager
      */
     public ServerController(FileManager fileManager) {
         this.fileManager = fileManager;
     }
-    public void setFileManager(FileManager newFileManager){
-    fileManager = newFileManager;
+
+    public void setFileManager(FileManager newFileManager) {
+        fileManager = newFileManager;
     }
 
 //    public static ServerController getInstance() {
@@ -44,7 +49,7 @@ public class ServerController {
      * String albumName, String artist,long length, String genre)
      */
     public void addTrack(ArrayList<String> str) {
-        fileManager.getTrackStorage().addTrack(str.get(0), str.get(1), str.get(2), Long.parseLong((String)str.get(3)), str.get(4));
+        fileManager.getTrackStorage().addTrack(str.get(0), str.get(1), str.get(2), Long.parseLong((String) str.get(3)), str.get(4));
     }
 
     public void addGenre(String str) {
@@ -75,19 +80,17 @@ public class ServerController {
 
 //Добавлен функционал поиск треков по жанрам(нужно протестить работу)
     /**
-     * @param i номер операции: 1-поиск по номеру трека 2-поиск по названию
+     * @param id номер операции: 1-поиск по номеру трека 2-поиск по названию
      * трека 3-поиск по исполнителю 4-поиск по альбому 5-поиск по жанру 6-поиск
      * всех треков
-     *
-     * @param str дополнительный параметр используется с соответствующим номером
-     * операции: 1-номер трека 2-название трека 3-нисполнитель 4-альбом 5-жанр
-     * 6-пустая строка
      *
      * @return возвращаем ArrayList с результатами поиска
      */
     public String findTrackById(Long id) {
         /*поиск по номеру трека*/
-        if(fileManager.getTrackStorage().getById(id)==null)return null;
+        if (fileManager.getTrackStorage().getById(id) == null) {
+            return null;
+        }
         return fileManager.getTrackStorage().getById(id).toString();
     }
 
@@ -155,18 +158,22 @@ public class ServerController {
     /**
      * обновляет трек по Id
      *
-     * @param str все параметры трека String name, String albumName, String
-     * artist,long length, String genre)
-     * @param id Id трека
+     * @param str все параметры трека long id, String name, String albumName,
+     * String artist,long length, String genre)
      */
     public void updateTrack(ArrayList<String> str) {
+        if (str.size() != 6) {
+            throw new NoSuchElementException();
+        }
         fileManager.getTrackStorage().setAllParam(str);
     }
 
     public void updateGenre(ArrayList<String> param) {
+        if (param.size() != 2) {
+            throw new NoSuchElementException();
+        }
         fileManager.getGenreStorage().getByTitle(param.get(0)).setName(param.get(1));
     }
-
 
     public String findGenreByTitle(String name) {
         return fileManager.getGenreStorage().getByTitle(name).toString();
@@ -193,7 +200,6 @@ public class ServerController {
     /**
      * Сохранение
      *
-     * @param i выбор пункта: 1-сохранить треки 2-сохранить жанры
      * @param str имя файла
      */
     public void save(String str) {
@@ -206,10 +212,10 @@ public class ServerController {
 //        return controller;
 //        //return getInstance();//!!!!!!!!!!!!!!!!!!!!!!!!!
 //    }
-    
-    public void replaceFileManager(FileManager newFileManager){
-    fileManager = newFileManager;//!!!!! kosyak maybe
+    public void replaceFileManager(FileManager newFileManager) {
+        fileManager = newFileManager;//!!!!! kosyak maybe
     }
+
     public void importTracks(String filename) {
         try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(new File(filename)));) {
             HashMap<Long, Track> tracks = (HashMap<Long, Track>) ois.readObject();

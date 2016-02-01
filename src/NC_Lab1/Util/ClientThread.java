@@ -38,6 +38,8 @@ public class ClientThread extends Thread {
      *
      * Информация передается только тогда когда err !=-1
      *
+     * @param err
+     * @param answer
      */
     public void sendAnswer(int err, ArrayList<String> answer) {
         try {

@@ -1,25 +1,23 @@
 package NC_Lab1.controller;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.util.ArrayList;
 
 /**
  *
- * Created by ovikeee on 01.11.2015
+ * @author ovikeee
  */
 public class ClientController {
 
-     ObjectOutputStream oout;
-     ObjectInputStream oin;
+    ObjectOutputStream oout;
+    ObjectInputStream oin;
 
- //   private static ClientController controller = new ClientController();
     public enum NumberOperation {
+
         addTrack, addGenre,
         findTrackById, findTrackByName, findTrackByGenre, findTrackByArtist, findTrackByAlbum, findTrackByLength,
         findGenreById, findGenreByName,
@@ -35,14 +33,12 @@ public class ClientController {
         fileManager = fileManagerString;
     }
 
-    public void startClient() {
-        int serverPort = 7777;          // порт сервера (его знают все клиенты, для подключения к серверу)
-        String address = "127.0.0.1";   // IP Сервера
+    public void startClient(int serverPort, String address) {
         try {
             InetAddress ipAddress = InetAddress.getByName(address);
             Socket socket = new Socket(ipAddress, serverPort);
          //   InputStream sin =socket.getInputStream(); 
-         //   OutputStream sout =socket.getOutputStream() ;
+            //   OutputStream sout =socket.getOutputStream() ;
             oout = new ObjectOutputStream(socket.getOutputStream());
             oout.flush();
             oin = new ObjectInputStream(socket.getInputStream());
@@ -62,11 +58,6 @@ public class ClientController {
             throw new IOException();
         }
     }
-
-//    public static ClientController getInstance() {
-//        //TrackStorage.loadFromFile("defaultFile");
-//        return controller;
-//    }
 
     public void addTrack(ArrayList<String> str) throws IOException {
         System.out.println("A zdes' ParametrsCli = " + str);
@@ -214,7 +205,7 @@ public class ClientController {
      *
      * @param str все параметры трека String name, String albumName, String
      * artist,long length, String genre)
-     * @param id Id трека
+     * @throws java.io.IOException
      */
     public void updateTrack(ArrayList<String> str) throws IOException {
         oout.writeObject(NumberOperation.updateTrack);
@@ -288,7 +279,6 @@ public class ClientController {
     /**
      * Сохранение
      *
-     * @param i выбор пункта: 1-сохранить треки 2-сохранить жанры
      * @param str имя файла
      * @throws java.io.IOException
      */
@@ -301,5 +291,3 @@ public class ClientController {
         }
     }
 }
-
-//Ошибки, пока не обрабатываются.

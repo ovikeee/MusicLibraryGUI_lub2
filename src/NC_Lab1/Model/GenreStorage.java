@@ -46,7 +46,6 @@ public class GenreStorage implements Serializable {
     }
 
     /**
-     * @param id id to find in id of genre
      * @return finded genre or null if id not found
      */
 

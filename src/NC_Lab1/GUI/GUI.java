@@ -4,52 +4,102 @@ import NC_Lab1.controller.ClientController;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.NoSuchElementException;
 import java.util.StringTokenizer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
+import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableModel;
 
 /**
+ * <p>
+ * Графический интерфейс пользователя. <br>
+ * В начальный момент запуска клиента, создается класс ClientController и
+ * открывается <br>
+ * файл по-умолчанию.(default.muslib) <br>
+ * На форме имеются кнопки для: <br>
+ * добавления треков<br>
+ * удаления треков <br>
+ * изменения треков <br>
+ * поиск треков по: id, name, artist, album, genre <br>
+ * вывод всех треков в таблицу <br>
+ * Редактор жанров <br>
+ * В меню-баре в меню File имеется возможность: <br>
+ * Открыть файл с разрешением muslib <br>
+ * Открыть файл по-умолчанию <br>
+ * Сохранить файл (под тем же названием) Save <br>
+ * Сохранить файл (выбрав новое название) SaveAs <br>
+ * Импортировать треки из других файлов<br>
+ * </p>
+ * <p>
+ * Приватные поля: <br>
+ * changed - необходимо, для того, чтобы выводить сообщение с предупреждением о
+ * том, что файл был изменен и пользовотелю было предлоено сохранить изменения
+ * при завершении работы с этим файлом <br>
+ * strings - временная переменая, которая хранит значения принимаемые от
+ * Клиент-контроллера param - параметры, передаваемые Клиент-контроллеру<br>
+ * </p>
  *
- * @author ovikee 10.11.15
+ * @author ovikeee
  */
 public class GUI extends javax.swing.JFrame {
 
-    private ClientController ctrl =new ClientController("default.muslib");// ClientController.getInstance();
-    ArrayList<String> strings = new ArrayList<>();
-    ArrayList<String> param = new ArrayList<>();
-    private final String systemMessage = "all is good.";
-    private boolean changed = false;
-
-    public GUI() {
-        initComponents();
-    }
-    public void startController(){
-        ctrl.startClient();
-    }
-
-    public void errorMessage(String msg) {
-        JOptionPane.showMessageDialog(this, msg, "ERROR", JOptionPane.ERROR_MESSAGE);
-    }
+    private final ClientController ctrl = new ClientController("default.muslib");
+    static boolean changed = false;
+    ArrayList<String> strings;
+    ArrayList<String> param;
 
     public enum FindTrack {
-
         ById, ByName, ByArtist, ByAlbum, ByGenre, ByAllTrack
     };
 
     /**
-     * str - доп. параметр case 1:поиск по номеру трека case 2:поиск по названию
-     * трека case 3:поиск по исполнителям case 4:поиск по альбомам case 5:поиск
-     * по жанрам case 6:поиск всех треков
+     * Конструктор класса.<br>
+     * Иницализирует графическое представление.
+     */
+    public GUI() {
+        initComponents();
+    }
+
+    /**
+     * Инициализируется клиент-контроллер.<br>
+     * Запускается начальное состояние файла по-умолчанию.
+     *
+     * @param serverPort порт сервера к которому подключается клиент
+     * @param address ip адресс сервера в сети
+     */
+    public void start(int serverPort, String address) {
+        ctrl.startClient(serverPort, address);
+        updateTables();
+    }
+
+    /**
+     * Модальное окно с выводом информации о ошибке
+     *
+     * @param msg сообщение об ощибке
+     */
+    public void errorMessage(String msg) {
+        JOptionPane.showMessageDialog(this, msg, "ERROR", JOptionPane.ERROR_MESSAGE);
+    }
+
+    /**
+     * Поиск и вывод результата в таблицу.
+     *
+     * @param find параметр, по которому производится поиск: ById, ByName,
+     * ByArtist, ByAlbum, ByGenre, ByAllTrack
+     * @param str строка с запросом
      */
     private void findAndShowInTable(FindTrack find, String str) {
 
-        strings = new ArrayList<>();
+        if (strings == null) {
+            strings = new ArrayList<>();
+        } else {
+            strings.clear();
+        }
 
-        jLabelSystemMessage.setText(systemMessage);
         DefaultTableModel model = (DefaultTableModel) jTable.getModel();
         for (int i = jTable.getRowCount(); i > 0; i--) {
             model.removeRow(i - 1);
@@ -57,7 +107,6 @@ public class GUI extends javax.swing.JFrame {
 
         try {
             switch (find) {
-
                 case ById:
                     strings.addAll(ctrl.findTrackById(Long.parseLong(str)));
                     break;
@@ -78,10 +127,9 @@ public class GUI extends javax.swing.JFrame {
                     break;
             }
 
-            StringTokenizer st;// = new StringTokenizer(strings);
+            StringTokenizer st;
             for (String string : strings) {
                 st = new StringTokenizer(string, " ");
-                System.out.println(string);
                 model.addRow(
                         new Object[]{
                             st.nextToken(),
@@ -91,7 +139,7 @@ public class GUI extends javax.swing.JFrame {
                             st.nextToken(),
                             st.nextToken()}
                 );
-            }//Возможна ошибка, если все параметры трека не указаны
+            }//!!!!!!!!!!!!Возможна ошибка, если все параметры трека не указаны
 
         } catch (IOException ex) {
             Logger.getLogger(GUI.class.getName()).log(Level.SEVERE, null, ex);
@@ -99,6 +147,9 @@ public class GUI extends javax.swing.JFrame {
         } catch (ClassNotFoundException ex) {
             Logger.getLogger(GUI.class.getName()).log(Level.SEVERE, null, ex);
             errorMessage("ClassNotFoundException!");
+        } catch (NoSuchElementException nsee) {
+            Logger.getLogger(GUI.class.getName()).log(Level.SEVERE, null, nsee);
+            errorMessage("Не все поля заполнены!");
         } catch (Exception ex) {
             Logger.getLogger(GUI.class.getName()).log(Level.SEVERE, null, ex);
             errorMessage("Треки не найдены!");
@@ -106,17 +157,26 @@ public class GUI extends javax.swing.JFrame {
 
     }
 
-    public void startState() {
-        jComboBoxGenre.removeAllItems();
+    /**
+     * Метод, который обновляет содержимое всей таблицы треков, заполняя таблицу
+     * всеми хранящимися в файле треками, а также обновляет содержимое comboBox
+     * для жанров.
+     */
+    private void updateTables() {
+        jComboBoxGenre.removeAllItems(); //удаляем содержимое comboBox для жанров
         try {
-            strings = new ArrayList<>();
+            if (strings == null) {
+                strings = new ArrayList<>();
+            } else {
+                strings.clear();
+            }
             strings = ctrl.findAllGenre();
             StringTokenizer st;
             for (String string : strings) {
                 st = new StringTokenizer(string);
                 jComboBoxGenre.addItem(st.nextToken());//инициализируем комбо бокс
             }
-            findAndShowInTable(FindTrack.ByAllTrack, "");
+            findAndShowInTable(FindTrack.ByAllTrack, "");//поиск всех треков
         } catch (IOException ex) {
             Logger.getLogger(GUI.class.getName()).log(Level.SEVERE, null, ex);
             errorMessage("Ошибка при загрузке файла!");
@@ -165,7 +225,6 @@ public class GUI extends javax.swing.JFrame {
         jMenuItemOpen = new javax.swing.JMenuItem();
         jOpenDefault = new javax.swing.JMenuItem();
         jMenuItemSave = new javax.swing.JMenuItem();
-        jMenuItemSaveAs = new javax.swing.JMenuItem();
         jMenuItemImport = new javax.swing.JMenuItem();
         jMenuItemExit = new javax.swing.JMenuItem();
 
@@ -253,12 +312,6 @@ public class GUI extends javax.swing.JFrame {
 
         jLabel4.setText("Length");
 
-        jTFArtist.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jTFArtistActionPerformed(evt);
-            }
-        });
-
         jLabel5.setText("System messge:");
 
         jLabelSystemMessage.setText("all is good");
@@ -266,11 +319,6 @@ public class GUI extends javax.swing.JFrame {
         jLabel6.setText("ID");
 
         jTFID.setEditable(false);
-        jTFID.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jTFIDActionPerformed(evt);
-            }
-        });
 
         jLabel7.setText("Genre");
 
@@ -279,11 +327,6 @@ public class GUI extends javax.swing.JFrame {
         jLabel9.setText("Поиск треков:");
 
         jComboBoxFindBy.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Id", "Name", "Artist", "Album", "Genre" }));
-        jComboBoxFindBy.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jComboBoxFindByActionPerformed(evt);
-            }
-        });
 
         jButton1.setFont(new java.awt.Font("Times New Roman", 2, 18)); // NOI18N
         jButton1.setText("editor of genres");
@@ -319,7 +362,7 @@ public class GUI extends javax.swing.JFrame {
         });
         jMenuOpenDefault.add(jMenuItemOpen);
 
-        jOpenDefault.setText("OpenDefault");
+        jOpenDefault.setText("Open default");
         jOpenDefault.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jOpenDefaultActionPerformed(evt);
@@ -335,15 +378,7 @@ public class GUI extends javax.swing.JFrame {
         });
         jMenuOpenDefault.add(jMenuItemSave);
 
-        jMenuItemSaveAs.setText("Save as..");
-        jMenuItemSaveAs.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jMenuItemSaveAsActionPerformed(evt);
-            }
-        });
-        jMenuOpenDefault.add(jMenuItemSaveAs);
-
-        jMenuItemImport.setText("Import tracks");
+        jMenuItemImport.setText("Import file");
         jMenuItemImport.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jMenuItemImportActionPerformed(evt);
@@ -511,22 +546,24 @@ public class GUI extends javax.swing.JFrame {
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
-/**
-     * addTrack( String name, String albumName, String artist,long length,
-     * String genre)
+
+    /**
+     * Обработчик кнопки: Add new track <br>
+     * Флаг changed = true <br>
+     *
      */
     private void jBAddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jBAddActionPerformed
-        changed = true;
-
-        param = new ArrayList<>();
-
+        if (param == null) {
+            param = new ArrayList<>();
+        } else {
+            param.clear();
+        }
         if (jTFName.getText().equals("") || jTFArtist.getText().equals("")
                 || jTFAlbum.getText().equals("") || jTFLength.getText().equals("")
                 || ((jTFGenre.isEditable() == true) && (jTFGenre.getText().equals("")))
                 || ((jTFGenre.isEditable() != true) && (jComboBoxGenre.getSelectedItem().equals("")))) {
             errorMessage("Заполните все поля!");
         } else {
-            // Условие обязательной заполнительности полей
             param.add(jTFName.getText());
             param.add(jTFArtist.getText());
             param.add(jTFAlbum.getText());
@@ -536,69 +573,69 @@ public class GUI extends javax.swing.JFrame {
             } else {
                 param.add(jComboBoxGenre.getSelectedItem().toString());
             }
-
             try {
-                System.out.println("ParametrsCli: " + param);
                 ctrl.addTrack(param);
-
+                updateTables();
+                changed = true;
             } catch (IOException ex) {
                 Logger.getLogger(GUI.class.getName()).log(Level.SEVERE, null, ex);
                 errorMessage("Не удалось открыть/сохранить файл!");
             }
-            startState();
         }
     }//GEN-LAST:event_jBAddActionPerformed
 
-    private void jTFArtistActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTFArtistActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_jTFArtistActionPerformed
-
     /**
-     * Show all tracks Возможна ошибка, если все параметры трека не указаны
+     * Обработчик кнопки: Show all tracks <br>
+     *
      */
     private void jBShowAllActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jBShowAllActionPerformed
-        startState();
+        updateTables();
     }//GEN-LAST:event_jBShowAllActionPerformed
 
     /**
-     * open file
+     * Обработчик кнопки: OpenFile <br>
+     * открывает диалоговое окно для выбора файла<br>
+     * Если файл был изменен, то выведется сообщение с предложением сохранить
+     * файл<br>
+     * дирректория по умолчанию
+     * C:\\Users\\User\\Documents\\NetBeansProjects\\MusicLibrary<br>
+     * фильтрация по разрешению muslib <br>
+     * Если открываем новый файл, то флаг changed=false;
      */
     private void jMenuItemOpenActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemOpenActionPerformed
         JFileChooser fileopen = new JFileChooser();
+        fileopen.setCurrentDirectory(new File("C:\\Users\\User\\Documents\\NetBeansProjects\\MusicLibrary"));//!!!!!!нужен относительный путь, а не абсолютный
+        FileFilter filter = new FileNameExtensionFilter(".muslib", "muslib");
+        fileopen.setFileFilter(filter);
 
-        fileopen.setCurrentDirectory(new File("C:\\Users\\User\\Documents\\NetBeansProjects\\MusicLibrary"));
         try {
-
-            JFileChooser fc = new JFileChooser();
-            //для фильтрации по формату
-//            FileNameExtensionFilter filter = new FileNameExtensionFilter("*.genre,*.track,*.*");
-//            fc.setFileFilter(filter);
-            fc.setCurrentDirectory(new File("C:\\Users\\User\\Documents\\NetBeansProjects\\MusicLibrary"));
-
-            if (changed) {
+            JFileChooser fileSave = new JFileChooser(); //диалог для сохранения изменений
+            fileSave.setFileFilter(filter);
+            fileSave.setCurrentDirectory(new File("C:\\Users\\User\\Documents\\NetBeansProjects\\MusicLibrary"));
+            if (changed) {//если файл изменялся, то спршиваем сохранить изменения или нет.
                 int i = JOptionPane.showConfirmDialog(null, "Хотите ли Вы сохранить изменения?", "Open", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE);
                 if (i == 0) {//хотим сохранить изменения
-
-                    if (fc.showSaveDialog(null) == JFileChooser.APPROVE_OPTION) {//название файла не пустое
-
-                        ctrl.save(fc.getSelectedFile().getName());
-
+                    if (fileSave.showSaveDialog(null) == JFileChooser.APPROVE_OPTION) {//название файла не пустое
+                        ctrl.save(fileSave.getSelectedFile().getName()); //сохраням изменёный файл
+                        if (fileopen.showDialog(null, "Открыть файл") == JFileChooser.APPROVE_OPTION) { //открываем новый файл
+                            ctrl.load(fileopen.getSelectedFile().getName());
+                            updateTables();
+                        }
+                        changed = false;
+                    } else {//не указан файл для сохранения
+                        errorMessage("Название файла не указано, файл не сохранен! Сохраните файл");
                     }
-                    fileopen = new JFileChooser();  //окошко для открытия файла
-                    if (fileopen.showDialog(null, "Открыть файл") == JFileChooser.APPROVE_OPTION) { //выбран файл
+                } else if (i == 1) {//не хотим сохранять файл, просто открываем файл
+                    if (fileopen.showDialog(null, "Открыть файл") == JFileChooser.APPROVE_OPTION) {//файл для открытия выбран
                         ctrl.load(fileopen.getSelectedFile().getName());
-                        startState();
-                    }
-                } else if (i == 1) {
-                    fileopen = new JFileChooser();
-                    if (fileopen.showDialog(null, "Открыть файл") == JFileChooser.APPROVE_OPTION) {
-                        ctrl.load(fileopen.getSelectedFile().getName());
-                        startState();
+                        updateTables();
+                        changed = false;
                     }
                 }
-            } else if (fileopen.showDialog(null, "Открыть файл") == JFileChooser.APPROVE_OPTION) {
+            } else if (fileopen.showDialog(null, "Открыть файл") == JFileChooser.APPROVE_OPTION) {//если файл не изменялся, не выводим сообщени о сохранении
                 ctrl.load(fileopen.getSelectedFile().getName());
-                startState();
+                updateTables();
+                changed = false;
             }
 
         } catch (IOException ex) {
@@ -608,53 +645,93 @@ public class GUI extends javax.swing.JFrame {
 
     }//GEN-LAST:event_jMenuItemOpenActionPerformed
 
+    /**
+     * Обработчик кнопки: Delete<br>
+     * Удаляет выбранный в таблице трек по id<br>
+     * Флаг changed = true <br>
+     */
     private void jBDeleteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jBDeleteActionPerformed
-        changed = true;
-        jLabelSystemMessage.setText(systemMessage);
         DefaultTableModel model = (DefaultTableModel) jTable.getModel();
         if (jTable.getSelectedRow() == -1) {
             if (jTable.getRowCount() == 0) {
-                jLabelSystemMessage.setText("Таблица пустая!");
+                errorMessage("Таблица пустая!");
             } else {
-                jLabelSystemMessage.setText("Вы должны выбрать трек!");
+                errorMessage("Вы должны выбрать трек!");
             }
         } else {
             try {
                 ctrl.removeTrackById(Long.parseLong(model.getValueAt(jTable.getSelectedRow(), 0).toString()));
                 model.removeRow(jTable.getSelectedRow());
-            } catch (Exception ex) {
+                changed = true;
+            } catch (NumberFormatException ex) {
+                errorMessage("Ошибка формата id трека");
+                Logger.getLogger(GUI.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (IOException ex) {
                 errorMessage("Ошибка при удалении трека");
                 Logger.getLogger(GUI.class.getName()).log(Level.SEVERE, null, ex);
             }
-
         }
-
     }//GEN-LAST:event_jBDeleteActionPerformed
 
+    /**
+     * Обработчик кнопки: Update<br>
+     * Изменяет параметры выбранного трека в соответствии с изменением в
+     * таблице<br>
+     * После изменения параметра нажимаем на кнопку update, причем измененый
+     * трек должен быть выделен<br>
+     * Флаг changed = true <br>
+     */
     private void jBUpdateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jBUpdateActionPerformed
-        changed = true;
-        param = new ArrayList<>();
-
-        jLabelSystemMessage.setText(systemMessage);
+        if (param == null) {
+            param = new ArrayList<>();
+        } else {
+            param.clear();
+        }
         DefaultTableModel model = (DefaultTableModel) jTable.getModel();
         if (jTable.getSelectedRow() == -1) {
             if (jTable.getRowCount() == 0) {
-                jLabelSystemMessage.setText("Таблица пустая!");
+                errorMessage("Таблица пустая!");
             } else {
-                jLabelSystemMessage.setText("Вы должны выбрать трек!");
+                errorMessage("Вы должны выбрать трек!");
             }
         } else {
             try {
-                param.add(model.getValueAt(jTable.getSelectedRow(), 0).toString());
-                param.add(model.getValueAt(jTable.getSelectedRow(), 1).toString());
-                param.add(model.getValueAt(jTable.getSelectedRow(), 2).toString());
-                param.add(model.getValueAt(jTable.getSelectedRow(), 3).toString());
-                param.add(model.getValueAt(jTable.getSelectedRow(), 4).toString());
-                param.add(model.getValueAt(jTable.getSelectedRow(), 5).toString());
-
+                if (!"".equals(model.getValueAt(jTable.getSelectedRow(), 0).toString())) {
+                    param.add(model.getValueAt(jTable.getSelectedRow(), 0).toString());
+                } else {
+                    throw new NoSuchElementException();
+                }
+                if (!"".equals(model.getValueAt(jTable.getSelectedRow(), 1).toString())) {
+                    param.add(model.getValueAt(jTable.getSelectedRow(), 1).toString());
+                } else {
+                    throw new NoSuchElementException();
+                }
+                if (!"".equals(model.getValueAt(jTable.getSelectedRow(), 2).toString())) {
+                    param.add(model.getValueAt(jTable.getSelectedRow(), 2).toString());
+                } else {
+                    throw new NoSuchElementException();
+                }
+                if (!"".equals(model.getValueAt(jTable.getSelectedRow(), 3).toString())) {
+                    param.add(model.getValueAt(jTable.getSelectedRow(), 3).toString());
+                } else {
+                    throw new NoSuchElementException();
+                }
+                if (!"".equals(model.getValueAt(jTable.getSelectedRow(), 4).toString())) {
+                    param.add(model.getValueAt(jTable.getSelectedRow(), 4).toString());
+                } else {
+                    throw new NoSuchElementException();
+                }
+                if (!"".equals(model.getValueAt(jTable.getSelectedRow(), 5).toString())) {
+                    param.add(model.getValueAt(jTable.getSelectedRow(), 5).toString());
+                } else {
+                    throw new NoSuchElementException();
+                }
                 ctrl.updateTrack(param);
-                startState();
-
+                updateTables();
+                changed = true;
+            } catch (NoSuchElementException nsee) {
+                Logger.getLogger(GUI.class.getName()).log(Level.SEVERE, null, nsee);
+                errorMessage("Не все поля заполнены!");
             } catch (Exception ex) {
                 errorMessage("Ошибка при обновлении трека");
                 Logger.getLogger(GUI.class.getName()).log(Level.SEVERE, null, ex);
@@ -664,41 +741,87 @@ public class GUI extends javax.swing.JFrame {
 
     }//GEN-LAST:event_jBUpdateActionPerformed
 
+    /**
+     * Обработчик кнопки: Import<br>
+     * Импортирует треки и жанры<br>
+     * Причем,не импортируются только абсолютно схожие треки<br>
+     * Флаг changed = true <br>
+     */
     private void jMenuItemImportActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemImportActionPerformed
-        changed = true;
-         JFileChooser fileopen = new JFileChooser();
 
-        fileopen.setCurrentDirectory(new File("C:\\Users\\User\\Documents\\NetBeansProjects\\MusicLibrary"));
-        
-        fileopen = new JFileChooser();
-                    if (fileopen.showDialog(null, "Импортировать файл") == JFileChooser.APPROVE_OPTION) {
+        JFileChooser fileopen = new JFileChooser();
+        fileopen.setCurrentDirectory(new File("C:\\Users\\User\\Documents\\NetBeansProjects\\MusicLibrary"));//!!!!!!нужен относительный путь, а не абсолютный
+        FileFilter filter = new FileNameExtensionFilter(".muslib", "muslib");
+        fileopen.setFileFilter(filter);
+        if (fileopen.showDialog(null, "Импортировать файл") == JFileChooser.APPROVE_OPTION) {
             try {
                 ctrl.importTracks(fileopen.getSelectedFile().getName());
-                startState();
+                updateTables();
+                changed = true;
             } catch (IOException ex) {
                 errorMessage("Ошибка при импорте");
             }
-                    }
-        
+        }
+
     }//GEN-LAST:event_jMenuItemImportActionPerformed
 
+    /**
+     * Обработчик кнопки: Open default<br>
+     * Открывает файл по-умолчанию<br>
+     * Если файл был изменен, то выведется сообщение с предложением сохранить
+     * файл<br>
+     * Если файл загружается удачно, то флаг changed = false <br>
+     */
     private void jOpenDefaultActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jOpenDefaultActionPerformed
         try {
-            ctrl.load("defaultFile.muslib");
-            startState();
-        } catch (IOException e) {
-            errorMessage("Файл не найден");
+            FileFilter filter = new FileNameExtensionFilter(".muslib", "muslib");
+            JFileChooser fileSave = new JFileChooser(); //диалог для сохранения изменений
+            fileSave.setFileFilter(filter);
+            fileSave.setCurrentDirectory(new File("C:\\Users\\User\\Documents\\NetBeansProjects\\MusicLibrary"));
+            if (changed) {//если файл изменялся, то спршиваем сохранить изменения или нет.
+                int i = JOptionPane.showConfirmDialog(null, "Хотите ли Вы сохранить изменения?", "Open", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE);
+                if (i == 0) {//хотим сохранить изменения
+                    if (fileSave.showSaveDialog(null) == JFileChooser.APPROVE_OPTION) {//название файла не пустое
+                        ctrl.save(fileSave.getSelectedFile().getName()); //сохраням изменёный файл                        
+                        ctrl.load("defaultFile.muslib");
+                        updateTables();
+                        changed = false;
+                    } else {//не указан файл для сохранения
+                        errorMessage("Название файла не указано, файл не сохранен! Сохраните файл");
+                    }
+                } else if (i == 1) {//не хотим сохранять файл, просто открываем файл
+                    ctrl.load("defaultFile.muslib");
+                    updateTables();
+                    changed = false;
+                }
+            } else {
+                ctrl.load("defaultFile.muslib");
+                updateTables();
+                changed = false;
+            }
+        } catch (IOException ex) {
+            Logger.getLogger(GUI.class.getName()).log(Level.SEVERE, null, ex);
+            errorMessage("Не удалось открыть/сохранить файл!");
         }
     }//GEN-LAST:event_jOpenDefaultActionPerformed
 
+    /**
+     * Обработчик кнопки: Find<br>
+     * поиск треков по: id, name, artist, album, genre <br>
+     * затем вывод в результата в таблицу<br>
+     */
     private void jBFindActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jBFindActionPerformed
-        jLabelSystemMessage.setText(systemMessage);
         if (jTFind.getText().equals("")) {
-            jLabelSystemMessage.setText("Введите в поле поиска значение!");
+            errorMessage("Введите в поле поиска значение!");
         } else {
             switch (jComboBoxFindBy.getSelectedItem().toString()) {//Id, Name, Artist, Album, Genre
                 case "Id":
-                    findAndShowInTable(FindTrack.ById, jTFind.getText());
+                    try {
+                        Long.parseLong(jTFind.getText());
+                        findAndShowInTable(FindTrack.ById, jTFind.getText());
+                    } catch (NumberFormatException ex) {
+                        errorMessage("Введите целое число!");
+                    }
                     break;
                 case "Name":
                     findAndShowInTable(FindTrack.ByName, jTFind.getText());
@@ -713,85 +836,64 @@ public class GUI extends javax.swing.JFrame {
                     findAndShowInTable(FindTrack.ByGenre, jTFind.getText());
                     break;
             }
-
-        }//!!!!!!!!!!1 не найдено
+        }
     }//GEN-LAST:event_jBFindActionPerformed
 
-    private void jTFIDActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTFIDActionPerformed
-        //Проверка на число в поле Id и на пустоту
-//        try {
-//            jLErrorId.setText("");
-//            if (!jTFID.getText().equals("")) {
-//                Integer.parseInt(jTFID.getText());
-//            }
-//        } catch (NumberFormatException nfe) {
-//            jLabelSystemMessage.setText("Поле Id ");
-//            jLErrorId.setForeground(Color.RED);
-//            jLErrorId.setText("*");
-//        }
-    }//GEN-LAST:event_jTFIDActionPerformed
-
+    /**
+     * Обработчик кнопки: Save<br>
+     * Сохранение файла. Флаг changed = false;
+     */
     private void jMenuItemSaveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemSaveActionPerformed
-
-        JFileChooser fc = new JFileChooser();
-        //для фильтрации по формату
-//        FileNameExtensionFilter filter = new FileNameExtensionFilter("*.genre,*.track,*.*");
-//        fc.setFileFilter(filter);
-        fc.setCurrentDirectory(new File("C:\\Users\\User\\Documents\\NetBeansProjects\\MusicLibrary"));
-
-        if (fc.showSaveDialog(null) == JFileChooser.APPROVE_OPTION) {
+        FileFilter filter = new FileNameExtensionFilter(".muslib", "muslib");
+        JFileChooser fileSave = new JFileChooser(); //диалог для сохранения изменений
+        fileSave.setFileFilter(filter);
+        fileSave.setCurrentDirectory(new File("C:\\Users\\User\\Documents\\NetBeansProjects\\MusicLibrary"));
+        if (fileSave.showSaveDialog(null) == JFileChooser.APPROVE_OPTION) {
             try {
-                ctrl.save(fc.getSelectedFile().getName());
+                ctrl.save(fileSave.getSelectedFile().getName());
+                changed = false;
             } catch (IOException ex) {
                 Logger.getLogger(GUI.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
     }//GEN-LAST:event_jMenuItemSaveActionPerformed
 
+    /**
+     * Обработчик кнопки: Exit<br>
+     * Завершает работу клиента. Если файл был изменен, то выведется сообщение с
+     * предложением сохранить файл<br>
+     *
+     */
     private void jMenuItemExitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemExitActionPerformed
         int i = 1;
         if (changed) {
             i = JOptionPane.showConfirmDialog(null, "Хотите ли Вы сохранить изменения?", "Save", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE);
         }
-        if (i == 0) {
-
-            JFileChooser fc = new JFileChooser();
-            //для фильтрации по формату
-            //FileNameExtensionFilter filter = new FileNameExtensionFilter("*.genre,*.track,*.*");
-            //fc.setFileFilter(filter);
-            fc.setCurrentDirectory(new File("C:\\Users\\User\\Documents\\NetBeansProjects\\MusicLibrary"));
-
-            if (fc.showSaveDialog(null) == JFileChooser.APPROVE_OPTION) {
+        if (i == 0) {//хотим сохранить
+            FileFilter filter = new FileNameExtensionFilter(".muslib", "muslib");
+            JFileChooser fileSave = new JFileChooser(); //диалог для сохранения изменений
+            fileSave.setFileFilter(filter);
+            fileSave.setCurrentDirectory(new File("C:\\Users\\User\\Documents\\NetBeansProjects\\MusicLibrary"));
+            if (fileSave.showSaveDialog(null) == JFileChooser.APPROVE_OPTION) {
                 try {
-                    ctrl.save(fc.getSelectedFile().getName());
+                    ctrl.save(fileSave.getSelectedFile().getName());
+                    changed = false;
                 } catch (IOException ex) {
                     Logger.getLogger(GUI.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
-        } else if (i == 1) {
+        } else if (i == 1) {//не хотим сохранять
             System.exit(0);
         }
 
     }//GEN-LAST:event_jMenuItemExitActionPerformed
 
-    private void jMenuItemSaveAsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemSaveAsActionPerformed
-
-        JFileChooser fc = new JFileChooser();
-        //для фильтрации по формату
-//        FileNameExtensionFilter filter = new FileNameExtensionFilter("*.genre,*.track,*.*");
-//        fc.setFileFilter(filter);
-        fc.setCurrentDirectory(new File("C:\\Users\\User\\Documents\\NetBeansProjects\\MusicLibrary"));
-
-        if (fc.showSaveDialog(null) == JFileChooser.APPROVE_OPTION) {
-            try {
-                ctrl.save(fc.getSelectedFile().getName());
-            } catch (IOException ex) {
-                Logger.getLogger(GUI.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        }
-    }//GEN-LAST:event_jMenuItemSaveAsActionPerformed
-
-    //автозаполнение
+    /**
+     * Автозаполнение полей ввода.<br>
+     * Представляет собой обработчик нажатия на трек в таблице<br>
+     * При нажатии на строку таблицы, поля ввода заполняются значениями из
+     * выбранной строки таблицы<br>
+     */
     private void jTableMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jTableMouseClicked
         DefaultTableModel model = (DefaultTableModel) jTable.getModel();
         jTFID.setText(model.getValueAt(jTable.getSelectedRow(), 0).toString());
@@ -801,21 +903,21 @@ public class GUI extends javax.swing.JFrame {
         jTFLength.setText(model.getValueAt(jTable.getSelectedRow(), 4).toString());
         jTFGenre.setText(model.getValueAt(jTable.getSelectedRow(), 5).toString());
         jComboBoxGenre.setSelectedItem(model.getValueAt(jTable.getSelectedRow(), 5).toString());
-
     }//GEN-LAST:event_jTableMouseClicked
 
-    //редактор жанров
+    /**
+     * Открытие редактора жанров.<br>
+     */
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         GenreFrame genre_Frame = new GenreFrame(ctrl);
         genre_Frame.setVisible(true);
-        genre_Frame.startState();
+        genre_Frame.updateTables();
         genre_Frame.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
     }//GEN-LAST:event_jButton1ActionPerformed
 
-    private void jComboBoxFindByActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBoxFindByActionPerformed
-
-    }//GEN-LAST:event_jComboBoxFindByActionPerformed
-
+    /**
+     * Переключатель с поля ввода жанра на ComboBox выбора жанров.
+     */
     private void jToggleButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jToggleButton1ActionPerformed
         if (jToggleButton1.isSelected()) {
             jTFGenre.setEditable(true);
@@ -824,6 +926,9 @@ public class GUI extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_jToggleButton1ActionPerformed
 
+    /**
+     * Временная кнопка для авто заполнения
+     */
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
         // jTFID.setText("1");
         jTFName.setText("tr1");
@@ -862,7 +967,6 @@ public class GUI extends javax.swing.JFrame {
     private javax.swing.JMenuItem jMenuItemImport;
     private javax.swing.JMenuItem jMenuItemOpen;
     private javax.swing.JMenuItem jMenuItemSave;
-    private javax.swing.JMenuItem jMenuItemSaveAs;
     private javax.swing.JMenu jMenuOpenDefault;
     private javax.swing.JMenuItem jOpenDefault;
     private javax.swing.JScrollPane jScrollPane1;
