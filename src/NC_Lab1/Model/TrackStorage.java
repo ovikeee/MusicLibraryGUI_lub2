@@ -4,34 +4,45 @@ import NC_Lab1.Util.FileManager;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Created by azaz on 26/10/15. Updated by ovikeee on 04/11/15.
+ * Класс, отвеающий за хранение треков, их обработку и поиск<br>
+ * Не является классом-одиночкой(Singleton) <br>
+ * В приватном поле storage хранятся все треки<br>
+ * В приватном поле fileManager храниться ссылка на агрегирующий файл, в котором
+ * храняться треки и жанры.
  */
 public class TrackStorage implements Serializable {
 
-//    private  TrackStorage ourInstance = SingletonHelper.INSTANCE;
     private FileManager fileManager;
-    private HashMap<Long, Track> storage;
+    private Map<Long, Track> storage;
 
+    /**
+     * Конструктор. Инициализируется поле storage и fileManeger.
+     *
+     * @param fileManager ссылка на агрегирующий файл, в котором храняться треки
+     * и жанры.
+     */
     public TrackStorage(FileManager fileManager) {
         this.fileManager = fileManager;
-        setStorage(new HashMap<>());
+        storage = new HashMap<>();
     }
 
     /**
-     * @param regexp regular expression to find in name of album
-     * @return finded genre or null if regexp not found
+     * Поиск трека по названию. Поиск осуществляется не по абсолютному
+     * совпадению названия трека, а<br>
+     * по совпадению с частью названия.
+     *
+     * @param regexp название трека
+     * @return результат поиска в виде ArrayList(Track)
      */
     public ArrayList<Track> getByTitle(String regexp) {
         ArrayList<Track> tracks = new ArrayList<>();
         Pattern pat = Pattern.compile(regexp);
-        for (Map.Entry<Long, Track> stringGenreEntry : getStorage().entrySet()) {
+        for (Map.Entry<Long, Track> stringGenreEntry : storage.entrySet()) {
             Matcher m = pat.matcher(stringGenreEntry.getValue().getTitle());
             if (m.find()) {
                 tracks.add(stringGenreEntry.getValue());
@@ -40,10 +51,18 @@ public class TrackStorage implements Serializable {
         return tracks;
     }
 
+    /**
+     * Поиск трека по названию исполнителя. Поиск осуществляется не по
+     * абсолютному совпадению названия исполнителя, а<br>
+     * по совпадению с частью его названия.
+     *
+     * @param regexp название исполнителя
+     * @return результат поиска в виде ArrayList(Track)
+     */
     public ArrayList<Track> getByArtist(String regexp) {
         ArrayList<Track> tracks = new ArrayList<>();
         Pattern pat = Pattern.compile(regexp);
-        for (Map.Entry<Long, Track> stringGenreEntry : getStorage().entrySet()) {
+        for (Map.Entry<Long, Track> stringGenreEntry : storage.entrySet()) {
             Matcher m = pat.matcher(stringGenreEntry.getValue().getArtist());
             if (m.find()) {
                 tracks.add(stringGenreEntry.getValue());
@@ -52,10 +71,18 @@ public class TrackStorage implements Serializable {
         return tracks;
     }
 
+    /**
+     * Поиск трека по названию альбома. Поиск осуществляется не по абсолютному
+     * совпадению названия альбома, а<br>
+     * по совпадению с частью его названия.
+     *
+     * @param regexp название альбома
+     * @return результат поиска в виде ArrayList(Track)
+     */
     public ArrayList<Track> getByAlbum(String regexp) {
         ArrayList<Track> tracks = new ArrayList<>();
         Pattern pat = Pattern.compile(regexp);
-        for (Map.Entry<Long, Track> stringGenreEntry : getStorage().entrySet()) {
+        for (Map.Entry<Long, Track> stringGenreEntry : storage.entrySet()) {
             Matcher m = pat.matcher(stringGenreEntry.getValue().getAlbum());
             if (m.find()) {
                 tracks.add(stringGenreEntry.getValue());
@@ -64,10 +91,18 @@ public class TrackStorage implements Serializable {
         return tracks;
     }
 
+    /**
+     * Поиск трека по названию жанра. Поиск осуществляется не по абсолютному
+     * совпадению названия жанра, а<br>
+     * по совпадению с частью его названия.
+     *
+     * @param regexp название жанра
+     * @return результат поиска в виде ArrayList(Track)
+     */
     public ArrayList<Track> getByGenre(String regexp) {
         ArrayList<Track> tracks = new ArrayList<>();
         Pattern pat = Pattern.compile(regexp);
-        for (Map.Entry<Long, Track> stringGenreEntry : getStorage().entrySet()) {
+        for (Map.Entry<Long, Track> stringGenreEntry : storage.entrySet()) {
             Matcher m = pat.matcher(stringGenreEntry.getValue().getGenre().getName());
             if (m.find()) {
                 tracks.add(stringGenreEntry.getValue());
@@ -76,6 +111,12 @@ public class TrackStorage implements Serializable {
         return tracks;
     }
 
+    /**
+     * Поиск трека по дляне трека.
+     *
+     * @param length длина трека
+     * @return результат поиска в виде ArrayList(Track)
+     */
     public ArrayList<Track> getByLength(Long length) {
         ArrayList<Track> tracks = new ArrayList<>();
         for (Map.Entry<Long, Track> entry : storage.entrySet()) {
@@ -87,26 +128,40 @@ public class TrackStorage implements Serializable {
     }
 
     /**
-     * @param id id to find in id of album
-     * @return finded genre or null if id not found
+     * Поиск трека по id.
+     *
+     * @param id id трека
+     * @return результат поиска в виде ArrayList(Track)
      */
     public Track getById(long id) {
-        return getStorage().get(id);
+        return storage.get(id);
     }
 
+    /**
+     * Поиск всех треков. <br>
+     *
+     * @return все треки, хранящиеся в storage в виде ArrayList(Track)
+     */
     public ArrayList<Track> getAllTracks() {
         ArrayList<Track> set = new ArrayList<>();
-        for (Map.Entry<Long, Track> longTrackEntry : getStorage().entrySet()) {
+        for (Map.Entry<Long, Track> longTrackEntry : storage.entrySet()) { //!!!!!!!!!!!!putAll!!!
             set.add(longTrackEntry.getValue());
         }
         return set;
     }
 
-    public void addTrack(Track newTrack) {
+    /**
+     * Метод, добавляющий новый трек в storage <br>
+     * Если такого трека в storage нет, то создаем и добавляем<br>
+     * иначе ничего не делаем
+     *
+     * @param newTrack объект GTrack, который добавляем в storage
+     */
+    public void addTrack(Track newTrack) { //!!!!!!!! проверка на абсолютную схожесть
         if (!fileManager.getGenreStorage().isGenre(newTrack.getGenre().getName())) {//если такого жанра нет, то создаем жанр
             fileManager.getGenreStorage().addGenre(newTrack.getGenre());
         }
-        if (getById(newTrack.getId()) == null) {//проверка на целостность
+        if (getById(newTrack.getId()) == null) {//проверка на уникальность id
             storage.put(newTrack.getId(), newTrack);
             fileManager.getGenreStorage().getByTitle(newTrack.getGenre().getName()).addInTrackList(newTrack); //добавили в треклист
             System.out.println("Трек: " + newTrack.getTitle() + " с Id= " + newTrack.getId() + " добавлен!");
@@ -115,8 +170,18 @@ public class TrackStorage implements Serializable {
         }
     }
 
-    //!!!!!!!! проверка на абсолютную схожесть
-    public void addTrack(String name, String albumName, String artist, long length, String genre) {
+    /**
+     * Перегруженный метод, добавляющий новый трек в storage <br>
+     * Если такого трека в storage нет, то создаем и добавляем<br>
+     * иначе ничего не делаем.
+     *
+     * @param name название трека
+     * @param albumName название альбома
+     * @param artist название исполнителя
+     * @param length длина записи
+     * @param genre название жанра
+     */
+    public void addTrack(String name, String albumName, String artist, long length, String genre) {    //!!!!!!!! проверка на абсолютную схожесть
         if (!fileManager.getGenreStorage().isGenre(genre)) {//если такого жанра нет, то создаем жанр
             fileManager.getGenreStorage().addGenre(genre);
         }
@@ -126,7 +191,12 @@ public class TrackStorage implements Serializable {
         System.out.println("Трек: " + track.getTitle() + " с Id= " + track.getId() + " добавлен!");
     }
 
-    public void setAllParam(ArrayList<String> al) {
+    /**
+     * Устанавливаем новые значения параметров указанного трека.
+     *
+     * @param al все новые параметры нового трека
+     */
+    public void setAllParam(ArrayList<String> al) {//!!!!!!!!!!!! в виде Мар передаем параметр!!!
         Track track = getById(Long.parseLong(al.get(0)));
         track.setTitle(al.get(1));
         track.setArtist(al.get(2));
@@ -138,60 +208,37 @@ public class TrackStorage implements Serializable {
         track.setGenre(fileManager.getGenreStorage().getByTitle(al.get(5)));
     }
 
+    /**
+     * Удаление трека по Id
+     *
+     * @param idTrack id трека
+     */
     public void removeTrackById(long idTrack) {
-//        storage.replace(idTrack, getById(idTrack));
         storage.remove(idTrack);
     }
 
+    /**
+     * Удаление всех треков из storage.
+     */
     public void removeAll() {
         storage.clear();
     }
 
+    /**
+     * Метод, возвращающий ссылку на storage.
+     *
+     * @return ссылка на storage
+     */
     public HashMap<Long, Track> getStorage() {
-        return storage;
+        return (HashMap<Long, Track>) storage;
     }
 
+    /**
+     * Метод, который устанавливает новый storage
+     *
+     * @param storage новое хранилище
+     */
     public void setStorage(HashMap<Long, Track> storage) {
         this.storage = storage;
     }
-
 }
-
-//    public  TrackStorage getInstance() {
-//        return ourInstance;
-//    }
-/**
- * @param filename file to load
- */
-//    public  void storeToFile(String filename) {
-//        try {
-//            ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(new File(filename)));
-//            oos.writeObject(getStorage());
-//            oos.close();
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//    }
-/**
- * @param filename file to store
- */
-//    public  void loadFromFile(String filename) {
-//        try {
-//            ObjectInputStream ois = new ObjectInputStream(new FileInputStream(new File(filename)));
-//            ourInstance = new TrackStorage();
-//            setStorage((HashMap<Long, Track>) ois.readObject());
-//            ois.close();
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        } catch (ClassNotFoundException e) {
-//            e.printStackTrace();
-//        }
-//    }
-//    protected Object readResolve() {
-//        TrackStorage.setStorage(this.storage);
-//        return getInstance();
-//    }
-//    private class SingletonHelper {
-//
-//        private  final TrackStorage INSTANCE = new TrackStorage();
-//    }

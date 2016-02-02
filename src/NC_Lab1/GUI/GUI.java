@@ -616,9 +616,9 @@ public class GUI extends javax.swing.JFrame {
                 int i = JOptionPane.showConfirmDialog(null, "Хотите ли Вы сохранить изменения?", "Open", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE);
                 if (i == 0) {//хотим сохранить изменения
                     if (fileSave.showSaveDialog(null) == JFileChooser.APPROVE_OPTION) {//название файла не пустое
-                        ctrl.save(fileSave.getSelectedFile().getName()); //сохраням изменёный файл
+                        ctrl.save(fileSave.getSelectedFile().getAbsolutePath()); //сохраням изменёный файл
                         if (fileopen.showDialog(null, "Открыть файл") == JFileChooser.APPROVE_OPTION) { //открываем новый файл
-                            ctrl.load(fileopen.getSelectedFile().getName());
+                            ctrl.load(fileopen.getSelectedFile().getAbsolutePath());
                             updateTables();
                         }
                         changed = false;
@@ -627,13 +627,13 @@ public class GUI extends javax.swing.JFrame {
                     }
                 } else if (i == 1) {//не хотим сохранять файл, просто открываем файл
                     if (fileopen.showDialog(null, "Открыть файл") == JFileChooser.APPROVE_OPTION) {//файл для открытия выбран
-                        ctrl.load(fileopen.getSelectedFile().getName());
+                        ctrl.load(fileopen.getSelectedFile().getAbsolutePath());
                         updateTables();
                         changed = false;
                     }
                 }
             } else if (fileopen.showDialog(null, "Открыть файл") == JFileChooser.APPROVE_OPTION) {//если файл не изменялся, не выводим сообщени о сохранении
-                ctrl.load(fileopen.getSelectedFile().getName());
+                ctrl.load(fileopen.getSelectedFile().getAbsolutePath());
                 updateTables();
                 changed = false;
             }
@@ -782,20 +782,20 @@ public class GUI extends javax.swing.JFrame {
                 int i = JOptionPane.showConfirmDialog(null, "Хотите ли Вы сохранить изменения?", "Open", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE);
                 if (i == 0) {//хотим сохранить изменения
                     if (fileSave.showSaveDialog(null) == JFileChooser.APPROVE_OPTION) {//название файла не пустое
-                        ctrl.save(fileSave.getSelectedFile().getName()); //сохраням изменёный файл                        
-                        ctrl.load("defaultFile.muslib");
+                        ctrl.save(fileSave.getSelectedFile().getAbsolutePath()); //сохраням изменёный файл                        
+                        ctrl.load("C:\\Users\\User\\Documents\\NetBeansProjects\\MusicLibrary\\default.muslib");
                         updateTables();
                         changed = false;
                     } else {//не указан файл для сохранения
                         errorMessage("Название файла не указано, файл не сохранен! Сохраните файл");
                     }
                 } else if (i == 1) {//не хотим сохранять файл, просто открываем файл
-                    ctrl.load("defaultFile.muslib");
+                    ctrl.load("C:\\Users\\User\\Documents\\NetBeansProjects\\MusicLibrary\\default.muslib");
                     updateTables();
                     changed = false;
                 }
             } else {
-                ctrl.load("defaultFile.muslib");
+                ctrl.load("C:\\Users\\User\\Documents\\NetBeansProjects\\MusicLibrary\\default.muslib");
                 updateTables();
                 changed = false;
             }
@@ -850,7 +850,7 @@ public class GUI extends javax.swing.JFrame {
         fileSave.setCurrentDirectory(new File("C:\\Users\\User\\Documents\\NetBeansProjects\\MusicLibrary"));
         if (fileSave.showSaveDialog(null) == JFileChooser.APPROVE_OPTION) {
             try {
-                ctrl.save(fileSave.getSelectedFile().getName());
+                ctrl.save(fileSave.getSelectedFile().getAbsolutePath());
                 changed = false;
             } catch (IOException ex) {
                 Logger.getLogger(GUI.class.getName()).log(Level.SEVERE, null, ex);
@@ -876,7 +876,7 @@ public class GUI extends javax.swing.JFrame {
             fileSave.setCurrentDirectory(new File("C:\\Users\\User\\Documents\\NetBeansProjects\\MusicLibrary"));
             if (fileSave.showSaveDialog(null) == JFileChooser.APPROVE_OPTION) {
                 try {
-                    ctrl.save(fileSave.getSelectedFile().getName());
+                    ctrl.save(fileSave.getSelectedFile().getAbsolutePath());
                     changed = false;
                 } catch (IOException ex) {
                     Logger.getLogger(GUI.class.getName()).log(Level.SEVERE, null, ex);

@@ -162,28 +162,24 @@ public class View {
     }
 
     public void show_dialog_Remove() {
-        System.out.println("Введите способ удаления(1,2,3,4,5,0):\n1)Удалить трек(по номеру).\n2Удалить жанр(по номеру).\n3Удалить жанр(по названию).\n4)Удалить все треки.\n5)Удалить все жанры.\n0)Отмена.");
+        System.out.println("Введите способ удаления(1,2,3,4,0):\n1)Удалить трек(по номеру).\n2Удалить жанр(по названию).\n3)Удалить все треки.\n4)Удалить все жанры.\n0)Отмена.");
         switch (scan.nextInt()) {
             case 1:
                 System.out.print("Введите номер трека: ");
                 ctrl.removeTrackById(scan.nextLong());
                 break;
             case 2:
-                System.out.print("Введите номер жанра: ");
-                ctrl.removeGenreById(scan.nextLong());
-                break;
-            case 3:
                 System.out.print("Введите название жанра: ");
                 ctrl.removeGenreByTitle(scan.next());
                 break;
-            case 4:
+            case 3:
                 System.out.print("Вы уверены, что хотите удалить все треки?(Y/N): ");
                 if (scan.next().equalsIgnoreCase("y")) {
                     ctrl.removeAllTracks();
                     System.out.println("Все треки удалены");
                 }
                 break;
-            case 5:
+            case 4:
                 System.out.print("Вы уверены, что хотите удалить все жанры?(Y/N): ");
                 if (scan.next().equalsIgnoreCase("y")) {
                     ctrl.removeAllGenres();

@@ -56,6 +56,7 @@ public class FileManager implements Serializable {
     }
 
     public void saveToFile(String filename) {
+        System.out.println(filename);
         try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(new File(filename + ".muslib")))) {
             oos.writeObject(trackStorage.getStorage());
             oos.writeObject(genreStorage.getStorage());

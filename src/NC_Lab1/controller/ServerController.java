@@ -60,9 +60,6 @@ public class ServerController {
         fileManager.getTrackStorage().removeTrackById(id);
     }
 
-    public void removeGenreById(long id) {
-        fileManager.getGenreStorage().removeGenreById(id);
-    }
 
     public void removeAllTracks() {
 

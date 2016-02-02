@@ -4,122 +4,138 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
- * Created by azaz on 26/10/15. Updated by ovikeee on 04/11/15.
+ * Класс, отвеающий за хранение жанров, их обработку и поиск<br>
+ * Не является классом-одиночкой(Singleton)<br>
+ * В приватном поле storage хранятся все жанры
  */
 public class GenreStorage implements Serializable {
 
-//    private  GenreStorage ourInstance = SingletonHelper.INSTANCE;
-    private  HashMap<String, Genre> storage;
-
-    public GenreStorage() {
-        setStorage(new HashMap<String, Genre>());
-    }
-
-//    public  GenreStorage getInstance() {
-//        return ourInstance;
-//    }
+    private Map<String, Genre> storage;
 
     /**
-     * @param filename file to load
+     * Конструктор.<br>
+     * Инициализируется поле storage.
      */
-    public  void storeToFile(String filename) {
+    public GenreStorage() {
+        storage = new HashMap<>();
+    }
+
+    /**
+     * Метод, который сохраняет поле storage в файл.<br>
+     *
+     * @param filename название файла
+     */
+    public void saveToFile(String filename) {
         try {
             ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(new File(filename)));
-            oos.writeObject(getStorage());
+            oos.writeObject(storage);
             oos.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-
     /**
-     * @param regexp regular expression to find in name of genre
-     * @return finded genre or null if regexp not found
+     * Получает объект жанр по названию жанра
+     *
+     * @param title название жанра
+     * @return объект типа Genre или null, если он не найден
      */
-    public  Genre getByTitle(String regexp) {
-        return storage.get(regexp);
+    public Genre getByTitle(String title) {
+        return storage.get(title);
     }
 
     /**
-     * @return finded genre or null if id not found
+     * Метод для получения поля storage
+     *
+     * @return ссылка на поле storage
      */
-
-    public  HashMap<String, Genre> getStorage() {
-        return storage;
+    public HashMap<String, Genre> getStorage() {
+        return (HashMap<String, Genre>) storage; //!!!!!!нарушение инкапсуляции?!
     }
 
-    public  ArrayList<String> getAllGenre() {
-        ArrayList<String> set = new ArrayList<>();
+    /**
+     * Метод, который возвращает названия всех жанров
+     *
+     * @return названия жанров в виде ArrayList(String)
+     */
+    public ArrayList<String> getAllGenre() {
+        ArrayList<String> set = new ArrayList<>();//!!!!!! не оптимальный поиск всех треков, надо подумать о возвращающем типе Genre или String
         for (Map.Entry<String, Genre> longTrackEntry : storage.entrySet()) {
             set.add(longTrackEntry.getValue().getName());
         }
         return set;
     }
 
-    public  void setStorage(HashMap<String, Genre> storage) {
-        this.storage = storage;
+    /**
+     * Метод, который устанавливает новый storage
+     *
+     * @param storage новое хранилище
+     */
+    public void setStorage(HashMap<String, Genre> storage) {
+        this.storage = storage; //!!!!!!!!!!!може нужно очищать и добавлятьчерез метод putAll?
     }
 
-    public  void addGenre(Genre newGenre) {
+    /**
+     * Метод, добавляющий новый жанр в storage <br>
+     * Если такого объекта в storage нет, то создаем и добавляем<br>
+     * иначе ничего не делаем
+     *
+     * @param newGenre объект Genre, который добавляем в storage
+     */
+    public void addGenre(Genre newGenre) {
         if (getByTitle(newGenre.getName()) == null) {
-            storage.put(newGenre.getName(),newGenre);
-            System.out.println("Жанр: " + newGenre.getName() + " добавлен!");
+            storage.put(newGenre.getName(), newGenre);
+            System.out.println("Жанр: " + newGenre.getName() + " добавлен!");//!!!!!! правильно ли здесь выводить сообщение?
+        } else {
+            System.out.println("Жанр: " + newGenre.getName() + " уже существует!");
         }
     }
 
-    public  void addGenre(String nameGenre) {
+    /**
+     * Перегруженый метод, который создает новый жанр потом добавляетв
+     * storage<br>
+     * Если такого объекта в storage нет, то создаем и добавляем<br>
+     * иначе ничего не делаем
+     *
+     * @param nameGenre название, добавляемого жанра
+     */
+    public void addGenre(String nameGenre) {
         if (getByTitle(nameGenre) == null) {
             Genre newGenre = new Genre(nameGenre);
             storage.put(nameGenre, newGenre);
             System.out.println("Жанр: " + newGenre.getName() + " добавлен!");
+        } else {
+            System.out.println("Жанр: " + nameGenre + " уже существует!");
         }
     }
 
-    public  void removeGenreById(long idGenre) {
-        //storage.replace(idGenre, getById(idGenre));
-        storage.remove(idGenre);
-    }
-
-    public  void removeGenreByTitle(String genreName) {
+    /**
+     * Метод, который удаляет жанр из storage по названию жанра
+     *
+     * @param genreName название удаляемого жанра
+     */
+    public void removeGenreByTitle(String genreName) { //!!!!!!!!!!!! необходимо что-то делать с треками у которых фигурирует этот жанр
         storage.remove(genreName);
     }
 
-    public  void removeAll() {
+    /**
+     * Метод, который удаляет все жанры из storage
+     */
+    public void removeAll() {
         storage.clear();
     }
-    
-    public boolean isGenre(String genre){
-    return storage.containsKey(genre);
-    }
-    
-        /**
-     * @param filename file to store
-     */
-//    public  void loadFromFile(String filename) {
-//        try {
-//            ObjectInputStream ois = new ObjectInputStream(new FileInputStream(new File(filename)));
-//            ourInstance = new GenreStorage();
-//            setStorage((HashMap<Long, Genre>) ois.readObject());
-//            ois.close();
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        } catch (ClassNotFoundException e) {
-//            e.printStackTrace();
-//        }
-//    }
-//
-//    protected Object readResolve() {
-////        GenreStorage.setStorage(this.storage);
-//        return ourInstance;//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-//    }
-//
-//    private  class SingletonHelper {
-//        private  final GenreStorage INSTANCE = new GenreStorage();
-//    }
 
+    /**
+     * Метод, который возвращает true, если жанр уже есть в storage и false,
+     * если нет
+     *
+     * @param genre название жанра
+     * @return true, если жанр уже есть в storage и false, если нет
+     */
+    public boolean isGenre(String genre) {
+        return storage.containsKey(genre);
+    }
 }

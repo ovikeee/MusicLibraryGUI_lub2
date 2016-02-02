@@ -151,10 +151,6 @@ public class ClientThread extends Thread {
                         ctrl.removeTrackById(oin.readLong());
                         sendAnswer(1, null);
                         break;
-                    case removeGenreById:
-                        ctrl.removeGenreById(oin.readLong());
-                        sendAnswer(1, null);
-                        break;
                     case removeGenreByName:
                         ctrl.removeGenreByTitle(oin.readUTF());
                         sendAnswer(1, null);
