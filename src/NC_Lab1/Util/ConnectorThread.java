@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package NC_Lab1.Util;
 
 import NC_Lab1.controller.ClientController;
@@ -15,30 +10,50 @@ import static java.lang.Thread.interrupted;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
  * Поток для регистрации клиентов на сервере. <br>
- * Создает поток для работы с каждым клиентом. <br>
+ * Создает потоки для работы с каждым клиентом. <br>
+ * Поля класса:<br>
+ * serverSocket - сокет сервера<br>
+ * clientThreadsGroup - группа потоков fileManegerMap - связывает имя файла и
+ * его fileManager clientMap - связывает имя файла и его клиента
  */
 public class ConnectorThread extends Thread {
 
-    private ServerSocket serverSocket;
-    private ThreadGroup clientThreadsGroup;
-    // private ArrayList<ThreadGroup> fileThreadGroups;
-    // private static HashMap<String, Integer> countClinet = new HashMap<String, Integer>();//количество клиентов, работающих над каждым файлом
-    private static HashMap<String, FileManager> fileManagerMap = new HashMap<String, FileManager>();//имя файла, файл
-    private static HashMap<Long, ClientThread> clientMap = new HashMap<Long, ClientThread>();//имя файла, клиент
-    // private static ArrayList<Thread> fileThreads = new ArrayList<Thread>();
+    private final ServerSocket serverSocket;
+    private final ThreadGroup clientThreadsGroup;
+    private static Map<String, FileManager> fileManagerMap;//имя файла, файл
+    private static Map<Long, ClientThread> clientMap;//id клиента, клиент
 
+    /**
+     * Конструктор.
+     *
+     * @param ss сокет сервера
+     */
     public ConnectorThread(ServerSocket ss) {
+        fileManagerMap = new HashMap<>();//имя файла, файл
+        clientMap = new HashMap<>();//имя файла, клиент
         serverSocket = ss;
         clientThreadsGroup = new ThreadGroup("AllClients");
     }
 
     /**
-     * Регистрирация клиентов на сервере.
+     * Регистрирация клиентов на сервере.<br>
+     * Метод ждет подключения клиентов и направляет нового клиента к выбранному
+     * fileManeger-у.<br>
+     * Если файл, который пытается открыть клиент ещё не открывался ранее, то
+     * создается fileManeger с данным файлом, и этот файл добавляется в
+     * fileManegerMap и clientManegerMap. Если файл, который пытается открыть
+     * клиент уже существует, то он получает ссылку на существующие fileManeger,
+     * и добавляется запись только в clientMap. Когда клиент завершает работу с
+     * файлом, то он вызывает метод dec у объекта fileManeger, который уменьшает
+     * количество клиентов, работающих с этим файлом. Если колиество клиентов,
+     * работающих с этим файлом становиться = 0, то fileManeger удаляется из
+     * fileManegerMap.
      *
      */
     @Override
@@ -54,25 +69,24 @@ public class ConnectorThread extends Thread {
         while (!interrupted()) {
 
             try {
-                tmpSocket = serverSocket.accept();
+                tmpSocket = serverSocket.accept(); //получаем сокет клиента
                 System.out.println("Новый клиент!");
                 FileInputStream fileOpenner;//для проверки на существование файла
                 oi = new ObjectInputStream(tmpSocket.getInputStream());
                 oos = new ObjectOutputStream(tmpSocket.getOutputStream());
                 codeOperation = (ClientController.NumberOperation) oi.readObject();
-                System.out.println("CodeOperation: " + codeOperation.toString());
-                fileName = oi.readUTF();//oi.readUTF();//считываем у клиента имя файла 
+                System.out.println("Код операции: " + codeOperation.toString());
+                fileName = oi.readUTF();//считываем у клиента имя файла 
                 System.out.println("Имя файла: " + fileName);
-                fileOpenner = new FileInputStream(fileName); //если не откроется файл, то кидаем исклюение и там создаем новый
+                fileOpenner = new FileInputStream(fileName); //если не откроется файл, то кидаем исклюение и там создаем новый fileManeger
                 fileOpenner.close();
-                clientNum = System.nanoTime();
+                clientNum = System.nanoTime();//генерируем id пользователя
                 if (fileManagerMap.containsKey(fileName)) {//подключаемся к открытому файлу 
                     System.out.println("Данный файл уже используется другими клиентами");
-                    clientThread = new ClientThread(clientThreadsGroup, oi, oos, clientNum, fileManagerMap.get(fileName));
+                    clientThread = new ClientThread(clientThreadsGroup, oi, oos, clientNum, fileManagerMap.get(fileName)); //создаем поток для работы с клиентом
                     clientMap.put(clientNum, clientThread);//добавляем нового клиента                
                     fileManagerMap.get(fileName).inc();//увеличиваем кол-во клиентов работающих с этим файлом
-// countClinet.put(fileName, countClinet.get(fileName) + 1);//увеличиваем кол-во клиентов работающих с этим файлом
-                    System.out.println("Вы подключились к этому файлу");
+                    System.out.println("Вы подключились к файлу: " + fileName);
                 } else {//подключаемся к неоткрытому файлу, но сущетвующему файлу
                     FileManager tmpFileManager = new FileManager(fileName);
                     tmpFileManager.loadFromFile(fileName);  //загружаем состояние
@@ -81,49 +95,50 @@ public class ConnectorThread extends Thread {
                     fileManagerMap.put(fileName, tmpFileManager);//имя файла, файл
                     clientThread = new ClientThread(clientThreadsGroup, oi, oos, clientNum, tmpFileManager);
                     clientMap.put(clientNum, clientThread);//добавляем нового клиента                
-//countClinet.put(fileName, 1);//добавляем новый файл и кол-во клиентов 1             
-                    System.out.println("Вы подключились к этому файлу");
+                    System.out.println("Вы подключились к файлу: " + fileName);
                 }
-                clientThread.start();
-            } catch (FileNotFoundException fileNotFoundException) {
+                clientThread.start();//запускаем клиента
+            } catch (FileNotFoundException fileNotFoundException) {//создаем новый fileManeger и подключаемся к нему.
                 System.out.println("Такой файл не существует");
                 FileManager tmpFileManager = new FileManager(fileName);
                 tmpFileManager.inc();
-                System.out.println("File: " + fileName + " was crate.");
+                System.out.println("Файл: " + fileName + " был создан.");
                 fileManagerMap.put(fileName, tmpFileManager);//имя файла, файл
                 clientThread = new ClientThread(clientThreadsGroup, oi, oos, clientNum, tmpFileManager);
                 clientMap.put(clientNum, clientThread);//добавляем нового клиента                
-                System.out.println("Вы подключились к этому файлу");
+                System.out.println("Вы подключились к файлу: " + fileName);
                 clientThread.start();
-            } catch (IOException ex) {
-                Logger.getLogger(ConnectorThread.class.getName()).log(Level.SEVERE, null, ex);
             } catch (ClassNotFoundException ex) {
+                Logger.getLogger(ConnectorThread.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (IOException ex) {
                 Logger.getLogger(ConnectorThread.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
         clientThreadsGroup.interrupt();
-
     }
 
+    /**
+     * Метод, который подключает клиента к новому fileManeger-у, чтобы он
+     * работал вместе с другими клментами над одним файлом в реальном времени.
+     *
+     * @param oldFileManager старый fileManeger
+     * @param newFileManager новый fileManeger
+     * @param clietNumber id клиента
+     */
     public static void replaceFile(String oldFileManager, String newFileManager, long clietNumber) {
-        //    private static HashMap<String, FileManager> fileManagerMap = new HashMap<String, FileManager>();//имя файла, файл
-        //    private static HashMap<Long, ClientThread> clientMap = new HashMap<Long, ClientThread>();//имя файла, клиент
-
-        //clientMap.get(clietNumber).replaceFileManager(null);
-        // replaceFileManager;
         try {
             FileInputStream fileOpenner;//для проверки на существование файла
             fileOpenner = new FileInputStream(newFileManager); //если не откроется файл, то кидаем исклюение и там создаем новый
             fileOpenner.close();
             if (fileManagerMap.containsKey(newFileManager)) {//подключаемся к открытому файлу 
                 System.out.println("Данный файл уже используется другими клиентами");
-                fileManagerMap.get(oldFileManager).dec();
+                fileManagerMap.get(oldFileManager).dec();//у старого fileManeger-а убавляем количество клиентов
                 if (fileManagerMap.get(oldFileManager).getClientsCount() == 0) {//если никто не работает с ним, то его удаляем
                     fileManagerMap.remove(oldFileManager);
                 }
                 fileManagerMap.get(newFileManager).inc();//увеличиваем кол-во клиентов работающих с этим файлом
-                clientMap.get(clietNumber).replaceFileManager(fileManagerMap.get(newFileManager));
-                System.out.println("Вы подключились к этому файлу");
+                clientMap.get(clietNumber).replaceFileManager(fileManagerMap.get(newFileManager));//устанавливаем клиенту новый fileManeger
+                System.out.println("Вы подключились к файлу: " + newFileManager);
             } else {//подключаемся к неоткрытому файлу, но сущетвующему файлу
                 FileManager tmpFileManager = new FileManager(newFileManager);
                 tmpFileManager.loadFromFile(newFileManager);  //загружаем состояние
@@ -135,7 +150,7 @@ public class ConnectorThread extends Thread {
                 System.out.println("Открыли файл: " + newFileManager);
                 fileManagerMap.put(newFileManager, tmpFileManager);
                 clientMap.get(clietNumber).replaceFileManager(tmpFileManager);
-                System.out.println("Вы подключились к этому файлу");
+                System.out.println("Вы подключились к файлу: " + newFileManager);
             }
         } catch (FileNotFoundException fileNotFoundException) {
             System.out.println("Такой файл не существует");
@@ -145,16 +160,22 @@ public class ConnectorThread extends Thread {
                 fileManagerMap.remove(oldFileManager);
             }
             tmpFileManager.inc();
-            System.out.println("File: " + newFileManager + " was crate.");
+            System.out.println("Файл: " + newFileManager + " был создан.");
             fileManagerMap.put(newFileManager, tmpFileManager);//имя файла, файл
             clientMap.get(clietNumber).replaceFileManager(tmpFileManager);
-            System.out.println("Вы подключились к этому файлу");
+            System.out.println("Вы подключились к файлу: " + newFileManager);
         } catch (IOException ex) {
             Logger.getLogger(ConnectorThread.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
-    public static void clientExit(long clientNum, String fileName) {
+    /**
+     * Метод, который удаляет клиента из clientMap.
+     *
+     * @param clientNum id клиента
+     * @param fileName название файла
+     */
+    public static void clientExit(long clientNum, String fileName) {//!!!!!!!!!!!! ресурсы освобождаются? fileManeger нужен ли метод closeFile???
         clientMap.remove(clientNum); //удаляем клиента из HashMap
         fileManagerMap.get(fileName).dec();//уменьшаем кол-во клиентов работающих с этим файлом
         if (fileManagerMap.get(fileName).getClientsCount() == 0) {//если никто не работает с ним, то его удаляем
@@ -162,7 +183,11 @@ public class ConnectorThread extends Thread {
         }
     }
 
-    //метод, позволяет отправить сообщение всем активным клиентам
+    /**
+     * Метод, позволяет отправить сообщение всем активным клиентам.
+     *
+     * @param message сообщение
+     */
     void respond(String message) throws IOException {
         ClientThread[] threadList = new ClientThread[clientThreadsGroup.activeCount()];
         clientThreadsGroup.enumerate(threadList);       // Все активные потоки из группы должны скопироваться в массив          

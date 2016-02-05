@@ -10,7 +10,7 @@ import java.util.Scanner;
 
 
 public class Server {
-    public static void main(String[] args) {
+    public static void main(String[] args) { 
 
         int port = 7777;
         Scanner scanner = new Scanner(System.in);

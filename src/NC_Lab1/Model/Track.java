@@ -31,7 +31,7 @@ public class Track implements Serializable {
      * @param genre объект типа Genre
      */
     public Track(String title, String artist, String albumName, long length, Genre genre) {//!!!!!!! нужно передавать Map, где <Параметр, Значение>
-        this.id = IdGenerator.getInstance().GetNextId();
+        this.id =System.nanoTime(); //!!!!!!!!!! нужен ли генератор id???? IdGenerator.getInstance().GetNextId();
         this.length = length;
         this.title = title;
         this.album = albumName;

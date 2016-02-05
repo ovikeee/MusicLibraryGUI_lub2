@@ -5,32 +5,31 @@
  */
 package NC_Lab1.Util;
 
-import NC_Lab1.Util.ConnectorThread;
 import NC_Lab1.controller.ClientController;
 import NC_Lab1.controller.ServerController;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import static java.lang.Thread.interrupted;
-import java.net.Socket;
 import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+/** 
+ */
 public class ClientThread extends Thread {
 
-    // private 
-    private ServerController ctrl;// = ServerController.getInstance();
+    private final ServerController ctrl;
     private FileManager fileManager;
     public ObjectOutputStream oout; //!!!!!!!!!!!!!!!!!!!!!!!11
     public ObjectInputStream oin;   //!!!!!!!!!!!!!!!!!!!!!!! не public
-    //  private Socket clientSocket;
-    private long clientID;
-    private ClientController.NumberOperation codeOperation;
+    private final long clientID;
+    private ClientController.NumberOperation codeOperation;//!!!!!!!!! полная чушь, если клиент и сервер находятся в разных проектах. Нужно загружать из файла или по сети
 
     /**
-     * Передает ответ от сервера к клиенту в ответе сначала идет ина о ошибке,
+     * Передает ответ от сервера к клиенту.<br> 
+     * В ответе сначала идет информация о статусе ошибки(1-ошибок нет, -1-ошибки есть),
      * затем массив строк. В случае, если передаются треки, то вся информация о
      * треке передается в виде строки. В случае, если передается один трек(т.е
      * был поиск по ID), то информация в виде параметров трека, начиная с Id
@@ -38,8 +37,8 @@ public class ClientThread extends Thread {
      *
      * Информация передается только тогда когда err !=-1
      *
-     * @param err
-     * @param answer
+     * @param err код ошибки
+     * @param answer передаваемая информация клиенту
      */
     public void sendAnswer(int err, ArrayList<String> answer) {
         try {
@@ -62,24 +61,38 @@ public class ClientThread extends Thread {
     }
 
     /**
-     *
+     * Конструктор.
+     * 
+     * @param g группа потоков
+     * @param oi поток чтения
+     * @param oos поток записи
+     * @param clientNum id клиента
+     * @param fileManeger объект агрегирующего класса, для хранения и работы с треками и жанрами
      */
     ClientThread(ThreadGroup g, ObjectInputStream oi, ObjectOutputStream oos, long clientNum, FileManager fileManager) {
-        super(g, "" + clientNum);
+        super(g, String.valueOf(clientNum));
         this.fileManager = fileManager;
         ctrl = new ServerController(this.fileManager);
         clientID = clientNum;
-        // clientSocket = s;
         oout = oos;
         oin = oi;
         System.out.println("К нам присоединился новый клиент!");
     }
 
+    /**
+     * Замена fileManeger-а
+     * @param newFileManager новый объект FileManager-а
+     */
     public void replaceFileManager(FileManager newFileManager) {
         fileManager = newFileManager;
         ctrl.setFileManager(fileManager);
     }
 
+    /**
+     * Метод, запуска потока.<br>
+     * Метод слушает от клиента код операции, затем по данному коду вызывает
+     * метод, который выполняет сервер.
+     */
     @Override
     public void run() {
         while (!interrupted()) {
@@ -136,7 +149,6 @@ public class ClientThread extends Thread {
                         break;
                     case loadTrackAndGenre:
                         ConnectorThread.replaceFile(fileManager.getFileName(), oin.readUTF(), clientID);
-//                        ctrl.load(oin.readUTF());
                         sendAnswer(1, null);
                         break;
                     case saveTrackAndGenre:
@@ -175,7 +187,7 @@ public class ClientThread extends Thread {
             } catch (SocketException ex) {
                 //Logger.getLogger(ConnectorThread.class.getName()).log(Level.SEVERE, null, ex);
                 System.out.println("Клиент №" + clientID + "отключился");
-                ConnectorThread.clientExit(clientID, fileManager.getFileName());                
+                ConnectorThread.clientExit(clientID, fileManager.getFileName());
                 break;
             } catch (IOException e) {
                 e.getStackTrace();

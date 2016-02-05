@@ -58,3 +58,5 @@
 //    private  class SingletonHelper {
 //        private  final GenreStorage INSTANCE = new GenreStorage();
 //    }
+
+//сделал поиск по треку, потом по жанру с тем же запросом(ввел id, а не жанр), потом добавил трек и вылезла ошибка.

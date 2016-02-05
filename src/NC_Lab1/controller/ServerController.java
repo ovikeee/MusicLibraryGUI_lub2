@@ -49,6 +49,7 @@ public class ServerController {
      * String albumName, String artist,long length, String genre)
      */
     public void addTrack(ArrayList<String> str) {
+        
         fileManager.getTrackStorage().addTrack(str.get(0), str.get(1), str.get(2), Long.parseLong((String) str.get(3)), str.get(4));
     }
 
