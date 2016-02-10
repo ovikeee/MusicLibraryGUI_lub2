@@ -5,14 +5,12 @@ import NC_Lab1.GUI.GUI;
  * Класс-клиент. 
  * Создает графический интерфейс пользователя.
  * 
- * @author ovikeee
  */
 public class Client {
 
     private static GUI gui;
 
     public static void main(String[] args) {
-
         gui = new GUI();
         gui.setVisible(true);
         int serverPort = 7777;          // порт сервера (его знают все клиенты, для подключения к серверу)

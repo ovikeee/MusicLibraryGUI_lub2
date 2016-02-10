@@ -1,6 +1,8 @@
 package NC_Lab1.GUI;
 
 import NC_Lab1.controller.ClientController;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -53,6 +55,7 @@ public class GUI extends javax.swing.JFrame {
     ArrayList<String> param;
 
     public enum FindTrack {
+
         ById, ByName, ByArtist, ByAlbum, ByGenre, ByAllTrack
     };
 
@@ -93,12 +96,11 @@ public class GUI extends javax.swing.JFrame {
      * @param str строка с запросом
      */
     private void findAndShowInTable(FindTrack find, String str) {
-
-        if (strings == null) {
-            strings = new ArrayList<>();
-        } else {
-            strings.clear();
-        }
+//        if (strings == null) {
+        strings = new ArrayList<>();
+//        } else {
+//            strings.clear();
+//        }
 
         DefaultTableModel model = (DefaultTableModel) jTable.getModel();
         for (int i = jTable.getRowCount(); i > 0; i--) {
@@ -126,9 +128,14 @@ public class GUI extends javax.swing.JFrame {
                     strings.addAll(ctrl.findAllTracks());
                     break;
             }
-
             StringTokenizer st;
+             if (strings.isEmpty()) {
+                    throw new NoSuchElementException();
+                }
             for (String string : strings) {
+                if (string == null) {
+                    throw new NoSuchElementException();
+                }
                 st = new StringTokenizer(string, " ");
                 model.addRow(
                         new Object[]{
@@ -141,7 +148,7 @@ public class GUI extends javax.swing.JFrame {
                 );
             }//!!!!!!!!!!!!Возможна ошибка, если все параметры трека не указаны
 
-        } catch (IOException ex) {
+        } catch (IOException ex) {//!!!!!!!!!!!логи Logger вынеси в поле класса, его достаточно инициализировать при загрузке класса.
             Logger.getLogger(GUI.class.getName()).log(Level.SEVERE, null, ex);
             errorMessage("Не удалось открыть/сохранить файл!");
         } catch (ClassNotFoundException ex) {
@@ -149,10 +156,10 @@ public class GUI extends javax.swing.JFrame {
             errorMessage("ClassNotFoundException!");
         } catch (NoSuchElementException nsee) {
             Logger.getLogger(GUI.class.getName()).log(Level.SEVERE, null, nsee);
-            errorMessage("Не все поля заполнены!");
+            errorMessage("Треки не найдены!");
         } catch (Exception ex) {
             Logger.getLogger(GUI.class.getName()).log(Level.SEVERE, null, ex);
-            errorMessage("Треки не найдены!");
+            errorMessage("Exception!");
         }
 
     }
@@ -165,11 +172,11 @@ public class GUI extends javax.swing.JFrame {
     private void updateTables() {
         jComboBoxGenre.removeAllItems(); //удаляем содержимое comboBox для жанров
         try {
-            if (strings == null) {
-                strings = new ArrayList<>();
-            } else {
-                strings.clear();
-            }
+//            if (strings == null) {
+            strings = new ArrayList<>();
+//            } else {
+//                strings.clear();
+//            }
             strings = ctrl.findAllGenre();
             StringTokenizer st;
             for (String string : strings) {
@@ -230,6 +237,11 @@ public class GUI extends javax.swing.JFrame {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setResizable(false);
+        addWindowListener(new java.awt.event.WindowAdapter() {
+            public void windowClosing(java.awt.event.WindowEvent evt) {
+                formWindowClosing(evt);
+            }
+        });
 
         jTable.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -553,11 +565,11 @@ public class GUI extends javax.swing.JFrame {
      *
      */
     private void jBAddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jBAddActionPerformed
-        if (param == null) {
-            param = new ArrayList<>();
-        } else {
-            param.clear();
-        }
+//        if (param == null) {
+        param = new ArrayList<>();
+//        } else {
+//            param.clear();
+//        }
         if (jTFName.getText().equals("") || jTFArtist.getText().equals("")
                 || jTFAlbum.getText().equals("") || jTFLength.getText().equals("")
                 || ((jTFGenre.isEditable() == true) && (jTFGenre.getText().equals("")))
@@ -682,11 +694,11 @@ public class GUI extends javax.swing.JFrame {
      * Флаг changed = true <br>
      */
     private void jBUpdateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jBUpdateActionPerformed
-        if (param == null) {
-            param = new ArrayList<>();
-        } else {
-            param.clear();
-        }
+//        if (param == null) {
+        param = new ArrayList<>();
+//        } else {
+//            param.clear();
+//        }
         DefaultTableModel model = (DefaultTableModel) jTable.getModel();
         if (jTable.getSelectedRow() == -1) {
             if (jTable.getRowCount() == 0) {
@@ -939,6 +951,29 @@ public class GUI extends javax.swing.JFrame {
         //jComboBoxGenre.setSelectedItem("");
 
     }//GEN-LAST:event_jButton2ActionPerformed
+
+    private void formWindowClosing(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosing
+        int i = 1;
+        if (changed) {
+            i = JOptionPane.showConfirmDialog(null, "Хотите ли Вы сохранить изменения?", "Save", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE);
+        }
+        if (i == 0) {//хотим сохранить
+            FileFilter filter = new FileNameExtensionFilter(".muslib", "muslib");
+            JFileChooser fileSave = new JFileChooser(); //диалог для сохранения изменений
+            fileSave.setFileFilter(filter);
+            fileSave.setCurrentDirectory(new File("C:\\Users\\User\\Documents\\NetBeansProjects\\MusicLibrary"));
+            if (fileSave.showSaveDialog(null) == JFileChooser.APPROVE_OPTION) {
+                try {
+                    ctrl.save(fileSave.getSelectedFile().getAbsolutePath());
+                    changed = false;
+                } catch (IOException ex) {
+                    Logger.getLogger(GUI.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        } else if (i == 1) {//не хотим сохранять
+            System.exit(0);
+        }
+    }//GEN-LAST:event_formWindowClosing
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

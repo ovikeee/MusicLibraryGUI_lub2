@@ -171,6 +171,24 @@ public class TrackStorage implements Serializable {
     }
 
     /**
+     * Проверка н абсолютную схожесть треков. Если все параметры схожи, не
+     * считая id, то треки считаются схожими и возвращается true Иначе faule.
+     */
+    private boolean isNew(Track oldTrack, Track newTrack) {
+        boolean flag;
+        if (oldTrack.getTitle().equals(newTrack.getTitle())
+                && oldTrack.getArtist().equals(newTrack.getArtist())
+                && oldTrack.getAlbum().equals(newTrack.getAlbum())
+                && oldTrack.getLength() == newTrack.getLength()
+                && oldTrack.getGenre().getName().equals(newTrack.getGenre().getName())) {
+            flag = true;
+        } else {
+            flag = false;
+        }
+        return flag;
+    }
+
+    /**
      * Перегруженный метод, добавляющий новый трек в storage <br>
      * Если такого трека в storage нет, то создаем и добавляем<br>
      * иначе ничего не делаем.

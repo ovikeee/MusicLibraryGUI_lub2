@@ -6,21 +6,24 @@ import java.io.ObjectOutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.NoSuchElementException;
 
 /**
- *
- * @author ovikeee
+ * Класс, который отвечает за взаимосвязь между графическим интерфейсов клиента и
+ * моделью серевера.
+ * 
+ * 
  */
 public class ClientController {
 
-    ObjectOutputStream oout;
-    ObjectInputStream oin;
+   private ObjectOutputStream oout;
+   private ObjectInputStream oin;
 
     public enum NumberOperation {
 
         addTrack, addGenre,
         findTrackById, findTrackByName, findTrackByGenre, findTrackByArtist, findTrackByAlbum, findTrackByLength,
-        findGenreById, findGenreByName,
+        getGenreByName, findGenreByName,
         findAllTrack, findAllGenre,
         loadTrackAndGenre, saveTrackAndGenre, importTracks,
         removeTrackById, removeGenreById, removeGenreByName, removeAllTrack, removeAllGenre,
@@ -144,7 +147,7 @@ public class ClientController {
         oout.flush();
         ArrayList<String> answerFromServer = new ArrayList();
         if (oin.readInt() == -1) {
-            throw new IOException();
+            throw new NoSuchElementException();
         }
         answerFromServer = (ArrayList<String>) oin.readObject();
         return answerFromServer;
@@ -157,7 +160,7 @@ public class ClientController {
         oout.flush();
         ArrayList<String> answerFromServer = new ArrayList();
         if (oin.readInt() == -1) {
-            throw new IOException();
+            throw new NoSuchElementException();
         }
         answerFromServer = (ArrayList<String>) oin.readObject();
         return answerFromServer;
@@ -169,7 +172,7 @@ public class ClientController {
         oout.flush();
         ArrayList<String> answerFromServer = new ArrayList();
         if (oin.readInt() == -1) {
-            throw new IOException();
+            throw new NoSuchElementException();
         }
         answerFromServer = (ArrayList<String>) oin.readObject();
         return answerFromServer;
@@ -181,7 +184,7 @@ public class ClientController {
         oout.flush();
         ArrayList<String> answerFromServer = new ArrayList();
         if (oin.readInt() == -1) {
-            throw new IOException();
+            throw new NoSuchElementException();
         }
         answerFromServer = (ArrayList<String>) oin.readObject();
         return answerFromServer;
@@ -225,17 +228,17 @@ public class ClientController {
         }
     }
 
-    public ArrayList<String> findGenreById(long id) throws IOException, ClassNotFoundException {
-        oout.writeObject(NumberOperation.findGenreById);
-        oout.writeLong(id);
-        oout.flush();
-        ArrayList<String> answerFromServer = new ArrayList();;
-        if (oin.readInt() == -1) {
-            throw new IOException();
-        }
-        answerFromServer = (ArrayList<String>) oin.readObject();
-        return answerFromServer;
-    }
+//    public ArrayList<String> findGenreById(long id) throws IOException, ClassNotFoundException {
+//        oout.writeObject(NumberOperation.findGenreById);
+//        oout.writeLong(id);
+//        oout.flush();
+//        ArrayList<String> answerFromServer = new ArrayList();;
+//        if (oin.readInt() == -1) {
+//            throw new IOException();
+//        }
+//        answerFromServer = (ArrayList<String>) oin.readObject();
+//        return answerFromServer;
+//    }
 
     public ArrayList<String> findGenreByName(String name) throws IOException, ClassNotFoundException {
         oout.writeObject(NumberOperation.findGenreByName);

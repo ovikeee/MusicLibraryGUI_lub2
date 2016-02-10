@@ -49,7 +49,6 @@ public class ServerController {
      * String albumName, String artist,long length, String genre)
      */
     public void addTrack(ArrayList<String> str) {
-        
         fileManager.getTrackStorage().addTrack(str.get(0), str.get(1), str.get(2), Long.parseLong((String) str.get(3)), str.get(4));
     }
 
@@ -60,7 +59,6 @@ public class ServerController {
     public void removeTrackById(long id) {
         fileManager.getTrackStorage().removeTrackById(id);
     }
-
 
     public void removeAllTracks() {
 
@@ -172,12 +170,20 @@ public class ServerController {
         }
         fileManager.getGenreStorage().getByTitle(param.get(0)).setName(param.get(1));
     }
-
+/**
+ * 
+     * @param name
+     * @return возвращается название введеного жанра, если жанр найден
+     * иначе возвращается null
+ */
     public String findGenreByTitle(String name) {
-        return fileManager.getGenreStorage().getByTitle(name).toString();
-
+        return (fileManager.getGenreStorage().isGenre(name))?name:null;
     }
 
+//    public ArrayList<String> getGenreByName(String regex){
+//        
+//     return 
+//    }
     public ArrayList<String> findAllGenre() {
         return fileManager.getGenreStorage().getAllGenre();
     }
@@ -214,6 +220,13 @@ public class ServerController {
         fileManager = newFileManager;//!!!!! kosyak maybe
     }
 
+    /**
+     * Импортирование выбранного файла в текущий файл. Если трек полностью
+     * идентичен одному из уже имеющихся, то мы его не добавляем. Иначе создаем
+     * новый такой трек.
+     *
+     * @param filename название импортируемого файла
+     */
     public void importTracks(String filename) {
         try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(new File(filename)));) {
             HashMap<Long, Track> tracks = (HashMap<Long, Track>) ois.readObject();
@@ -225,6 +238,12 @@ public class ServerController {
                     //всем трекам назначить 
                 }
             }
+//            for (Map.Entry<Long, Genre> entry : genres.entrySet()) {
+//                if (fileManager.getGenreStorage().getByTitle(entry.getValue().getName()) == null) {//если  такого жанра нет, то создаем новый
+//                    fileManager.getGenreStorage().addGenre(entry.getValue());
+//                    //всем трекам назначить 
+//                }
+//            }
 //               for (Map.Entry<Long, Track> entry : tracks.entrySet()) {
 //                  if(TrackStorage.getById(entry.getKey())==null){//если id такого трека нет, то создаем новый
 //                  

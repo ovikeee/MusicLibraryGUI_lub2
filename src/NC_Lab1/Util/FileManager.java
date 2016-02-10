@@ -115,7 +115,7 @@ public class FileManager implements Serializable {
     public TrackStorage getTrackStorage() {
         return trackStorage;
     }
-
+}
 //    public  FileManager getInstance() {
 //        return instance;
 //    }
@@ -127,4 +127,4 @@ public class FileManager implements Serializable {
 //    protected Object readResolve() {
 //        return getInstance();
 //    }
-}
+
