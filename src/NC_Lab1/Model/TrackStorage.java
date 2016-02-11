@@ -99,7 +99,7 @@ public class TrackStorage implements Serializable {
      * @param regexp название жанра
      * @return результат поиска в виде ArrayList(Track)
      */
-    public ArrayList<Track> getByGenre(String regexp) {
+    public ArrayList<Track> getByGenre(String regexp) {//!!!!!!!
         ArrayList<Track> tracks = new ArrayList<>();
         Pattern pat = Pattern.compile(regexp);
         for (Map.Entry<Long, Track> stringGenreEntry : storage.entrySet()) {
@@ -158,21 +158,27 @@ public class TrackStorage implements Serializable {
      * @param newTrack объект GTrack, который добавляем в storage
      */
     public void addTrack(Track newTrack) { //!!!!!!!! проверка на абсолютную схожесть
-        if (!fileManager.getGenreStorage().isGenre(newTrack.getGenre().getName())) {//если такого жанра нет, то создаем жанр
+        if (!fileManager.getGenreStorage().isGenre(newTrack.getGenre().getName())) {//если такого жанра нет, то создаем новый жанр
             fileManager.getGenreStorage().addGenre(newTrack.getGenre());
         }
-        if (getById(newTrack.getId()) == null) {//проверка на уникальность id
-            storage.put(newTrack.getId(), newTrack);
-            fileManager.getGenreStorage().getByTitle(newTrack.getGenre().getName()).addInTrackList(newTrack); //добавили в треклист
+        if (getById(newTrack.getId()) == null) {//проверка на уникальность id, если id не уникальный, но остальные параметры различаются, то создаем новый трек
+            storage.put(newTrack.getId(), newTrack);//такого id нету значит добавляем этот трек
+            fileManager.getGenreStorage().getByTitle(newTrack.getGenre().getName()).addInTrackList(newTrack); //добавляем трек в треклист жанра
             System.out.println("Трек: " + newTrack.getTitle() + " с Id= " + newTrack.getId() + " добавлен!");
         } else {
-            System.out.println("Трек: " + newTrack.getTitle() + " с Id= " + newTrack.getId() + " уже существует!!!");
+            if (!isConsist(newTrack)) {//если такого трека нету, то 
+                storage.put(newTrack.getId(), newTrack);
+                fileManager.getGenreStorage().getByTitle(newTrack.getGenre().getName()).addInTrackList(newTrack); //добавили в треклист
+                System.out.println("Трек: " + newTrack.getTitle() + " с новым Id= " + newTrack.getId() + " добавлен!");
+            } else {
+                System.out.println("Трек: " + newTrack.getTitle() + " с Id= " + newTrack.getId() + " уже существует!!!");
+            }
         }
     }
 
     /**
-     * Проверка н абсолютную схожесть треков. Если все параметры схожи, не
-     * считая id, то треки считаются схожими и возвращается true Иначе faule.
+     * Проверка на абсолютную схожесть треков. Если все параметры схожи, не
+     * считая id, то треки считаются не новым и возвращается false Иначе true.
      */
     private boolean isNew(Track oldTrack, Track newTrack) {
         boolean flag;
@@ -181,11 +187,27 @@ public class TrackStorage implements Serializable {
                 && oldTrack.getAlbum().equals(newTrack.getAlbum())
                 && oldTrack.getLength() == newTrack.getLength()
                 && oldTrack.getGenre().getName().equals(newTrack.getGenre().getName())) {
-            flag = true;
-        } else {
             flag = false;
+        } else {
+            flag = true;
         }
         return flag;
+    }
+
+    /**
+     * Метод проверяет содержится ли данный трек в текущем TrackStorage. Если
+     * трек содержится, то возвращаем true, иначе false.
+     *
+     * @param checkedTrack проверяемый трек
+     * @return Если трек содержится, то возвращаем true, иначе false.
+     */
+    public boolean isConsist(Track checkedTrack) {
+        for (Map.Entry<Long, Track> entry : storage.entrySet()) {//пробегаем по всем трекам и если найдём схожий, то возвращаем true
+            if (!isNew(checkedTrack, entry.getValue())) { //если трек уже имеется...
+                return true;                              //возвращаем true
+            }
+        }
+        return false;
     }
 
     /**
@@ -231,7 +253,7 @@ public class TrackStorage implements Serializable {
      *
      * @param idTrack id трека
      */
-    public void removeTrackById(long idTrack) {
+    public void removeTrackById(long idTrack) {//!!!!!!!!!нужно из tracklist жанра удалить данный трек
         storage.remove(idTrack);
     }
 

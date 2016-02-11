@@ -221,9 +221,13 @@ public class ServerController {
     }
 
     /**
-     * Импортирование выбранного файла в текущий файл. Если трек полностью
-     * идентичен одному из уже имеющихся, то мы его не добавляем. Иначе создаем
-     * новый такой трек.
+     * Импортирование треков из выбранного файла в текущий файл.<br>
+     * Сначала импортируем жанры. Если такой жанр существует, то его не импортируем.<br>
+     * Затем импортируем треки. Если трек полностью идентичен(не считая id) одному из уже имеющихся, то мы его не импортируем.
+     * (эта проверка заложена в методе addTrack в классе TrackStorage)
+     * Иначе создаем новый трек. (При создании трека, если жанр новый, то добавляем этот жанр. 
+     * Если такой жанр трека уже имеется, то добавляем этот трек в tracklist этого жанра)<br>
+     * 
      *
      * @param filename название импортируемого файла
      */
@@ -232,24 +236,16 @@ public class ServerController {
             HashMap<Long, Track> tracks = (HashMap<Long, Track>) ois.readObject();
             HashMap<Long, Genre> genres = (HashMap<Long, Genre>) ois.readObject();
 
-            for (Map.Entry<Long, Genre> entry : genres.entrySet()) {
-                if (fileManager.getGenreStorage().getByTitle(entry.getValue().getName()) == null) {//если  такого жанра нет, то создаем новый
+            for (Map.Entry<Long, Genre> entry : genres.entrySet()) {//импортируем жанры
+                if (fileManager.getGenreStorage().getByTitle(entry.getValue().getName()) == null) {//если такого жанра нет, то создаем новый
                     fileManager.getGenreStorage().addGenre(entry.getValue());
-                    //всем трекам назначить 
                 }
-            }
-//            for (Map.Entry<Long, Genre> entry : genres.entrySet()) {
-//                if (fileManager.getGenreStorage().getByTitle(entry.getValue().getName()) == null) {//если  такого жанра нет, то создаем новый
-//                    fileManager.getGenreStorage().addGenre(entry.getValue());
-//                    //всем трекам назначить 
-//                }
-//            }
-//               for (Map.Entry<Long, Track> entry : tracks.entrySet()) {
-//                  if(TrackStorage.getById(entry.getKey())==null){//если id такого трека нет, то создаем новый
-//                  
-//                      TrackStorage.addTrack(entry.getValue());
-//                  }
-//              }
+            }  
+            
+            for (Map.Entry<Long, Track> entry : tracks.entrySet()) {//импортируем треки
+                fileManager.getTrackStorage().addTrack(entry.getValue());//в самом методе производится проверка на абсолютную схожесть и привязка треков к жанрам
+              }
+            //привязка новых треков к жанрам 
 
         } catch (IOException e) {
             e.printStackTrace();
