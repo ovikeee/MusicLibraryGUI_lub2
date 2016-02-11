@@ -13,6 +13,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  *
@@ -170,20 +172,41 @@ public class ServerController {
         }
         fileManager.getGenreStorage().getByTitle(param.get(0)).setName(param.get(1));
     }
-/**
- * 
+
+    /**
+     * Возвращает название трека, если он есть. Иначе null. //!!!!!!! можно
+     * возвращать true или false
+     *
      * @param name
-     * @return возвращается название введеного жанра, если жанр найден
-     * иначе возвращается null
- */
-    public String findGenreByTitle(String name) {
-        return (fileManager.getGenreStorage().isGenre(name))?name:null;
+     * @return возвращается название введеного жанра, если жанр найден иначе
+     * возвращается null
+     */
+    public String getGenreByTitle(String name) {
+        return (fileManager.getGenreStorage().isGenre(name)) ? name : null;
     }
 
-//    public ArrayList<String> getGenreByName(String regex){
-//        
-//     return 
-//    }
+    /**
+     * Метод, ищет совпадение в названии жанра с введеным шаблоном. Если
+     * найдется совпадение с шаблоном, то этот жанр добавляется в массив.
+     * 
+     * @param regexp шаблон для поиска
+     * @return массив жанров, у которые совпали с введеным шаблоном
+     */
+    public ArrayList<String> findGenreByTitle(String regexp) {
+        ArrayList<String> result = new ArrayList<>();
+        Pattern pat = Pattern.compile(regexp);
+        for (Map.Entry<String, Genre> stringGenreEntry : fileManager.getGenreStorage().getStorage().entrySet()) {
+            Matcher m = pat.matcher(stringGenreEntry.getKey());
+            if (m.find()) {
+                result.add(stringGenreEntry.getKey());
+            }
+        }
+        if (result.isEmpty()) {
+            return null;
+        }
+        return result;
+    }
+
     public ArrayList<String> findAllGenre() {
         return fileManager.getGenreStorage().getAllGenre();
     }
@@ -222,12 +245,14 @@ public class ServerController {
 
     /**
      * Импортирование треков из выбранного файла в текущий файл.<br>
-     * Сначала импортируем жанры. Если такой жанр существует, то его не импортируем.<br>
-     * Затем импортируем треки. Если трек полностью идентичен(не считая id) одному из уже имеющихся, то мы его не импортируем.
-     * (эта проверка заложена в методе addTrack в классе TrackStorage)
-     * Иначе создаем новый трек. (При создании трека, если жанр новый, то добавляем этот жанр. 
-     * Если такой жанр трека уже имеется, то добавляем этот трек в tracklist этого жанра)<br>
-     * 
+     * Сначала импортируем жанры. Если такой жанр существует, то его не
+     * импортируем.<br>
+     * Затем импортируем треки. Если трек полностью идентичен(не считая id)
+     * одному из уже имеющихся, то мы его не импортируем. (эта проверка заложена
+     * в методе addTrack в классе TrackStorage) Иначе создаем новый трек. (При
+     * создании трека, если жанр новый, то добавляем этот жанр. Если такой жанр
+     * трека уже имеется, то добавляем этот трек в tracklist этого жанра)<br>
+     *
      *
      * @param filename название импортируемого файла
      */
@@ -240,11 +265,11 @@ public class ServerController {
                 if (fileManager.getGenreStorage().getByTitle(entry.getValue().getName()) == null) {//если такого жанра нет, то создаем новый
                     fileManager.getGenreStorage().addGenre(entry.getValue());
                 }
-            }  
-            
+            }
+
             for (Map.Entry<Long, Track> entry : tracks.entrySet()) {//импортируем треки
                 fileManager.getTrackStorage().addTrack(entry.getValue());//в самом методе производится проверка на абсолютную схожесть и привязка треков к жанрам
-              }
+            }
             //привязка новых треков к жанрам 
 
         } catch (IOException e) {

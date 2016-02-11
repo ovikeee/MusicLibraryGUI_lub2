@@ -136,7 +136,7 @@ public class ClientThread extends Thread {
                         sendAnswer(1, answer);
                         break;
                     case findGenreByName:
-                        answer.add(ctrl.findGenreByTitle(oin.readUTF()));
+                        answer = ctrl.findGenreByTitle(oin.readUTF());
                         sendAnswer(1, answer);
                         break;
                     case findAllTrack:

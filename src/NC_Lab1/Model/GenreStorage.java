@@ -47,6 +47,8 @@ public class GenreStorage implements Serializable {
         return storage.get(title);
     }
 
+    
+    
     /**
      * Метод для получения поля storage
      *
