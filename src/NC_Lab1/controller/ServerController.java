@@ -3,6 +3,7 @@ package NC_Lab1.controller;
 import NC_Lab1.Model.Genre;
 import NC_Lab1.Model.GenreStorage;
 import NC_Lab1.Model.Track;
+import NC_Lab1.Model.TrackComparatorById;
 import NC_Lab1.Model.TrackStorage;
 import NC_Lab1.Util.FileManager;
 import java.io.File;
@@ -49,9 +50,11 @@ public class ServerController {
      *
      * @param str массив с параметрами для добавления: addTrack( String name,
      * String albumName, String artist,long length, String genre)
+     * @return 1-если трек добавлен
+     * -1- если трек уже существует
      */
-    public void addTrack(ArrayList<String> str) {
-        fileManager.getTrackStorage().addTrack(str.get(0), str.get(1), str.get(2), Long.parseLong((String) str.get(3)), str.get(4));
+    public int addTrack(ArrayList<String> str) {
+       return fileManager.getTrackStorage().addTrack(str.get(0), str.get(1), str.get(2), Long.parseLong((String) str.get(3)), str.get(4));
     }
 
     public void addGenre(String str) {
@@ -97,6 +100,7 @@ public class ServerController {
         ArrayList<Track> tracks = new ArrayList<>();
         ArrayList<String> answer = new ArrayList<>();
         tracks.addAll(fileManager.getTrackStorage().getByTitle(name));
+        tracks.sort(new TrackComparatorById());
         for (int i = 0; i < tracks.size(); i++) {
             answer.add(tracks.get(i).toString());
         }
@@ -260,13 +264,11 @@ public class ServerController {
         try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(new File(filename)));) {
             HashMap<Long, Track> tracks = (HashMap<Long, Track>) ois.readObject();
             HashMap<Long, Genre> genres = (HashMap<Long, Genre>) ois.readObject();
-
             for (Map.Entry<Long, Genre> entry : genres.entrySet()) {//импортируем жанры
                 if (fileManager.getGenreStorage().getByTitle(entry.getValue().getName()) == null) {//если такого жанра нет, то создаем новый
                     fileManager.getGenreStorage().addGenre(entry.getValue());
                 }
             }
-
             for (Map.Entry<Long, Track> entry : tracks.entrySet()) {//импортируем треки
                 fileManager.getTrackStorage().addTrack(entry.getValue());//в самом методе производится проверка на абсолютную схожесть и привязка треков к жанрам
             }

@@ -48,6 +48,8 @@ public class ClientThread extends Thread {
             //System.out.println("err = " + err);
             oout.writeInt(err);
             if ((err != -1) && (answer != null)) {
+                //sort
+                
                 oout.writeObject(answer);
                 for (String string : answer) {
                     System.out.println(string);
@@ -104,8 +106,7 @@ public class ClientThread extends Thread {
 
                 switch (codeOperation) {
                     case addTrack:
-                        ctrl.addTrack((ArrayList<String>) oin.readObject());
-                        sendAnswer(1, null);
+                        sendAnswer(ctrl.addTrack((ArrayList<String>) oin.readObject()), null);
                         break;
                     case addGenre:
                         ctrl.addGenre(oin.readUTF());
@@ -183,6 +184,10 @@ public class ClientThread extends Thread {
                         ctrl.updateGenre((ArrayList<String>) oin.readObject());//принимает старое значение жанра и новое
                         sendAnswer(1, null);
                         break;
+                    //case getSortedById:
+                    //ctrl.getSortedById()
+                    //case getSortedByTitle
+                    //case getSortedByLenght
                 }
             } catch (SocketException ex) {
                 //Logger.getLogger(ConnectorThread.class.getName()).log(Level.SEVERE, null, ex);

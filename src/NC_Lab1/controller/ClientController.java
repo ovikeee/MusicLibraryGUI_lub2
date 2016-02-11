@@ -63,7 +63,7 @@ public class ClientController {
     }
 
     public void addTrack(ArrayList<String> str) throws IOException {
-        System.out.println("A zdes' ParametrsCli = " + str);
+        System.out.println("Параметры, которые отправляются на сервер: " + str);
         oout.writeObject(NumberOperation.addTrack);
         oout.writeObject(str);
 
@@ -71,8 +71,8 @@ public class ClientController {
 
         int i = oin.readInt();
         if (i == -1) {
-            System.out.println("Операция не выполнена!");
-            throw new IOException();
+            System.out.println("Трек уже существует!");
+            throw new IllegalArgumentException();
         }
     }
 

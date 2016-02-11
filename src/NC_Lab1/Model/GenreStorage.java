@@ -46,8 +46,6 @@ public class GenreStorage implements Serializable {
     public Genre getByTitle(String title) {
         return storage.get(title);
     }
-
-    
     
     /**
      * Метод для получения поля storage
@@ -65,9 +63,7 @@ public class GenreStorage implements Serializable {
      */
     public ArrayList<String> getAllGenre() {
         ArrayList<String> set = new ArrayList<>();//!!!!!! не оптимальный поиск всех треков, надо подумать о возвращающем типе Genre или String
-        for (Map.Entry<String, Genre> longTrackEntry : storage.entrySet()) {
-            set.add(longTrackEntry.getValue().getName());
-        }
+        set.addAll(storage.keySet());
         return set;
     }
 

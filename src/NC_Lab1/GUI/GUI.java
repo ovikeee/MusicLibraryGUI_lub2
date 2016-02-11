@@ -129,9 +129,9 @@ public class GUI extends javax.swing.JFrame {
                     break;
             }
             StringTokenizer st;
-             if (strings.isEmpty()) {
-                    throw new NoSuchElementException();
-                }
+            if (strings.isEmpty()) {
+                throw new NoSuchElementException();
+            }
             for (String string : strings) {
                 if (string == null) {
                     throw new NoSuchElementException();
@@ -592,6 +592,9 @@ public class GUI extends javax.swing.JFrame {
             } catch (IOException ex) {
                 Logger.getLogger(GUI.class.getName()).log(Level.SEVERE, null, ex);
                 errorMessage("Не удалось открыть/сохранить файл!");
+            } catch (IllegalArgumentException ex) {
+                Logger.getLogger(GUI.class.getName()).log(Level.SEVERE, null, ex);
+                errorMessage("Такой трек уже существует!");
             }
         }
     }//GEN-LAST:event_jBAddActionPerformed

@@ -177,6 +177,42 @@ public class TrackStorage implements Serializable {
     }
 
     /**
+     * Перегруженный метод, добавляющий новый трек в storage <br>
+     * Если такого трека в storage нет, то создаем и добавляем<br>
+     * иначе ничего не делаем.
+     *
+     * @param name название трека
+     * @param albumName название альбома
+     * @param artist название исполнителя
+     * @param length длина записи
+     * @param genre название жанра
+     * @return 1-если трек добавлен без ошибок
+     * -1-если такой трек уже существует
+     */
+    public int addTrack(String name, String albumName, String artist, long length, String genre) {    //!!!!!!!! проверка на абсолютную схожесть
+        if (!fileManager.getGenreStorage().isGenre(genre)) {//если такого жанра нет, то создаем жанр
+            fileManager.getGenreStorage().addGenre(genre);
+        }
+        Track newTrack = new Track(name, albumName, artist, length, fileManager.getGenreStorage().getByTitle(genre));
+      if ((getById(newTrack.getId()) == null)&&(!isConsist(newTrack))) {//если такой трек не существует, то создаем новый трек
+            //не существует - т.е трека с таким id не существует или с абсолютно схожими параметрами
+            storage.put(newTrack.getId(), newTrack);//такого id нету значит добавляем этот трек
+            fileManager.getGenreStorage().getByTitle(genre).addInTrackList(newTrack); //добавляем трек в треклист жанра
+            System.out.println("Трек: " + newTrack.getTitle() + " с Id= " + newTrack.getId() + " добавлен!");
+            return 1;
+      } else {
+//            if (!isConsist(newTrack)) {//если такого трека нету, то 
+//                storage.put(newTrack.getId(), newTrack);
+//                fileManager.getGenreStorage().getByTitle(genre).addInTrackList(newTrack); //добавили в треклист
+//                System.out.println("Трек: " + newTrack.getTitle() + " с новым Id= " + newTrack.getId() + " добавлен!");
+//            } else {
+                System.out.println("Такой трек уже существует!!!");
+                return -1;
+            //}
+        }
+    }
+
+    /**
      * Проверка на абсолютную схожесть треков. Если все параметры схожи, не
      * считая id, то треки считаются не новым и возвращается false Иначе true.
      */
@@ -208,27 +244,6 @@ public class TrackStorage implements Serializable {
             }
         }
         return false;
-    }
-
-    /**
-     * Перегруженный метод, добавляющий новый трек в storage <br>
-     * Если такого трека в storage нет, то создаем и добавляем<br>
-     * иначе ничего не делаем.
-     *
-     * @param name название трека
-     * @param albumName название альбома
-     * @param artist название исполнителя
-     * @param length длина записи
-     * @param genre название жанра
-     */
-    public void addTrack(String name, String albumName, String artist, long length, String genre) {    //!!!!!!!! проверка на абсолютную схожесть
-        if (!fileManager.getGenreStorage().isGenre(genre)) {//если такого жанра нет, то создаем жанр
-            fileManager.getGenreStorage().addGenre(genre);
-        }
-        Track track = new Track(name, albumName, artist, length, fileManager.getGenreStorage().getByTitle(genre));
-        storage.put(track.getId(), track);
-        fileManager.getGenreStorage().getByTitle(genre).addInTrackList(track); //добавили в треклист
-        System.out.println("Трек: " + track.getTitle() + " с Id= " + track.getId() + " добавлен!");
     }
 
     /**
